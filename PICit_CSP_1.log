@@ -1,0 +1,13 @@
+--------------------------------------------------
+--- PICit! Cross Section Preprocessor log file ---
+--------------------------------------------------
+Input file         : 
+Output file        : ar_arp_cs.bin
+Comments           : AR+ + AR complete set based on Phelps formulas (1994 JAP paper)
+Energy division    :  0.001
+Energy entries     : 1000000
+Interpolation      : FUNCTION
+Reactions          : 
+0: >  Ar+ + Ar -> Ar+ + Ar  isotropic elastic / type : 0 / target : 4 / value : 0.000000e+000
+1: >  Ar+ + Ar -> Ar+ + Ar  backward elastic / type : 1 / target : 4 / value : 0.000000e+000
+--------------------------------------------------

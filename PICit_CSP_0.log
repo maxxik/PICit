@@ -1,0 +1,14 @@
+--------------------------------------------------
+--- PICit! Cross Section Preprocessor log file ---
+--------------------------------------------------
+Input file         : 
+Output file        : ar_e_cs.bin
+Comments           : ELE + AR complete set based on Phelps formulas
+Energy division    :  0.001
+Energy entries     : 1000000
+Interpolation      : FUNCTION
+Reactions          : 
+0: >  e + Ar -> e + Ar  isotropic elastic / type : 0 / target : 4 / value : 0.000000e+000
+1: >  e + Ar -> e + Ar*  isotropic excitation / type : 0 / target : 4 / value : 1.150000e+001
+2: >  e + Ar -> e + e + Ar+  ionization / type : 3 / target : 4 / value : 1.580000e+001
+--------------------------------------------------
