@@ -1,6 +1,6 @@
 ELASTIC
 Ar
-1.371000e-5
+0
 SPECIES: Ar* / Ar*
 PROCESS: Ar* + Ar* -> Ar* + Ar*, Elastic
 PARAM.:

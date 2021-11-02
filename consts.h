@@ -27,6 +27,7 @@ constexpr double     J_TO_EV        = 1.0 / E_CHARGE;             // eV <- Joule
  constexpr int        COLL_DISS_REC     = 9;                       // dissociative recombination
  constexpr int        COLL_ASS_DET      = 10;                      // associative detachment
  constexpr int        COLL_ISO_FASTATOM = 11;                      // @@@
+ constexpr int        COLL_BACK_FASTATOM = 12;                     // @@@
  constexpr int        COLL_CHARGE_TRANS = COLL_DISS_ATTACH;        // asymmetric charge transfer 
 
 

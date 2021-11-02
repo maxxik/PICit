@@ -524,6 +524,48 @@ void fill_cs_Phelps_1994paper_Arp(int& sets){
   }
 }
 
+void fill_cs_Phelps_1994paper_Arp_FastAtomProcess(int& sets){
+  
+  const double REDUCED_MASS_RATIO = 2.0;
+  int    k;
+  double en, cs_value;
+  sets = 2;
+  cout << "cross section sets found --> "<< sets << endl;
+  sigma.resize(sets);
+  for (k=0; k<sets; k++){
+    sigma.at(k).values.resize(CS_RANGES);
+    sigma.at(k).process.reserve(CS_STRING_LENGTH);
+    sigma.at(k).product[0] = -1; sigma.at(k).product[1] = -1; sigma.at(k).product[2] = -1; sigma.at(k).product[3] = -1;
+    sigma.at(k).target = AR_GAS;
+  }
+
+  // elastic (isotropic)
+  k=0;
+  sigma.at(k).type = COLL_ISO_FASTATOM;
+  sigma.at(k).process = "Ar+ + Ar -> Ar+ + Ar  isotropic elastic FA";
+  sigma.at(k).E_threshold = 0.0;
+  for(int i=0; i<CS_RANGES; i++){
+    en = DE_CS * max(i, 1) * REDUCED_MASS_RATIO;                // energy conversion: com -> lab
+    cs_value = 2e-19 * pow(en,-0.5) / (1.0+en) + 3e-19 * en / pow(1.0 + en/3.0, 2);
+    sigma.at(k).values.at(i) = (float) cs_value;
+  }
+
+  // elastic (backward) = symmetric charge transfer
+  k=1;
+  sigma.at(k).type = COLL_BACK_FASTATOM;
+  sigma.at(k).process = "Ar+ + Ar -> Ar+ + Ar  backward elastic FA";
+  sigma.at(k).E_threshold = 0.0;
+  for(int i=0; i<CS_RANGES; i++){
+    en = DE_CS * max(i, 1) * REDUCED_MASS_RATIO;                // energy conversion: com -> lab
+    cs_value = (1.15e-18 * pow(en,-0.1) * pow(1.0+0.015/en, 0.6) -
+               (2e-19 * pow(en,-0.5) / (1.0+en) + 3e-19 * en / pow(1.0 + en/3.0, 2))) / 2.0;      // (Qm - Qi)/2
+    sigma.at(k).values.at(i) = (float) cs_value;
+  }
+  
+  for (k=0; k<sets; k++){
+    cout << sigma.at(k).process << " / type: " << sigma.at(k).type << " / value: " << scientific <<  sigma.at(k).E_threshold << endl;
+  }
+}
 
 //
 // Writing log file for documentation
@@ -761,6 +803,15 @@ void process_Arp_Ar_Phelps_1994paper(void){
   fill_cs_Phelps_1994paper_Arp(cs_sets);
 }
 
+// @@@
+void process_Arp_Ar_Phelps_1994paper_FastAtomProcess(void){
+  interpolation_type = "FUNCTION";
+  comments           = "AR+ + AR complete set based on Phelps formulas (1994 JAP paper)";
+  input_name         = "";
+  output_name        = "ar_arp_fa_cs.bin";
+  fill_cs_Phelps_1994paper_Arp_FastAtomProcess(cs_sets);
+}
+
 //
 // Entry point for AR fast + AR fast from @@@ TODO
 //
@@ -773,6 +824,7 @@ void process_Arf_Ar(void){
   for (int k=0; k<cs_sets; k++){
     sigma.at(k).product[0] = -1; sigma.at(k).product[1] = -1; sigma.at(k).product[2] = -1; sigma.at(k).product[3] = -1;
     sigma.at(k).target = AR_GAS;
+    if (sigma.at(k).type == COLL_ISO){ sigma.at(k).type = COLL_ISO_FASTATOM; };
   }
 }
 
@@ -1824,7 +1876,7 @@ int main() {
   
   
   //  process_Arp_Ar_Phelps_website();   // not recommended due to referencing issues
-  process_Arp_Ar_Phelps_1994paper();
+  process_Arp_Ar_Phelps_1994paper_FastAtomProcess();
   write_cs(output_name, comments);
  
   //  process_ele_Ne2p1_excit_Biagi();
@@ -1883,7 +1935,7 @@ int main() {
   //remove("cs_Ne_Nep.bin");
   //remove("cs_O2_Nep.bin");
 
-  process_Arp_Ar_Phelps_1994paper();
+  process_Arf_Ar();
   write_cs(output_name, comments);
 
   return 0;

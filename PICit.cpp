@@ -134,6 +134,7 @@ FILE     *datafile;                                          // used for saving 
 
 bool     measurement_mode;                                   // flag that controls measurements and data saving
 
+bool     DEBUG_MODE = false;
 
 
 //---------------------------------------------------------------------------//
@@ -431,12 +432,12 @@ void init_vectors(void){
 //----------------------------------------------------------------------//
 
 void init_seed(int nseed, bool forseeding = false){
-    
-cout<<">> PICit! Seeding particles..."<<endl;
+    cout<<">> PICit! Seeding particles..."<<endl;
     for(int n=0; n<N_SPECIES; n++){
+        if(n==AR_FAST) break;   //break from loop if fast atom TODO
         for (int i=0; i<nseed; i++){
-            x[n].push_back( L * R01(MTgen) );                                  // initial random position 
-            vx[n].push_back(0.0); vy[n].push_back(0.0); vz[n].push_back(0.0);  // initial velocity components 
+            x[n].push_back( L * R01(MTgen) );                                  // initial random position
+            vx[n].push_back(0.0); vy[n].push_back(0.0); vz[n].push_back(0.0);  // initial velocity components
         }
         if(forseeding) break;   //break from loop after seeding electrons (n=0)
     }
@@ -527,6 +528,82 @@ void ionization_equalshare(const int species_index, const int product_index, con
         --ratio;
     }
 }
+
+// @@@
+void isotropic_scattering_fa(const int species_index, const double E_threshold, double &eta, double &chi, double &g, const double xe,
+ const double ct, const double st, const double cp, const double sp, const double F1, const double wx, const double wy, const double wz){
+
+    if(E_threshold != 0.0){
+        double energy = 0.5 * MASS(species_index) * g * g;      // projectile energy
+        energy = fabs(energy - E_threshold * EV_TO_J);          // subtract energy loss for excitation
+        g = sqrt(2.0 * energy / MASS(species_index)); 
+    }  
+    eta = TWO_PI * R01(MTgen);
+    chi = acos(1.0 - 2.0 * R01(MTgen));
+
+    double sc   = sin(chi);
+    double cc   = cos(chi);
+    double se   = sin(eta);
+    double ce   = cos(eta);
+    double gx   = g * (ct * cc - st * sc * ce);
+    double gy   = g * (st * cp * cc + ct * cp * sc * ce - sp * sc * se);
+    double gz   = g * (st * sp * cc + ct * sp * sc * ce + cp * sc * se);
+
+    double vx_2_t = wx - F1 * gx;
+    double vy_2_t = wy - F1 * gy;
+    double vz_2_t = wz - F1 * gz;
+    double v_2_t = sqrt(vx_2_t * vx_2_t + vy_2_t * vy_2_t + vz_2_t * vz_2_t);
+
+    double energy_2_t = 0.5 *  MASS(AR_FAST) * v_2_t * v_2_t;     // TODO
+
+    
+    if(energy_2_t > FA_E_THRESHOLD){
+        x[AR_FAST].push_back( xe );                                 // add new fast atom TODO: AR_FAST általánosabban
+        vx[AR_FAST].push_back( vx_2_t ); 
+        vy[AR_FAST].push_back( vy_2_t );
+        vz[AR_FAST].push_back( vz_2_t );
+
+        // TODO: remove energy from P field
+    }
+    else{ // TODO: add energy from P field
+    }
+}
+
+// @@@
+void backward_scattering_fa(const int species_index, const double E_threshold, double &eta, double &chi, double &g, const double xe,
+ const double ct, const double st, const double cp, const double sp, const double F1, const double wx, const double wy, const double wz){
+
+    chi  = PI;                                              // scattering angle for scattered projectile
+    eta  = TWO_PI * R01(MTgen);                             // azimuthal angle for scattered projectile
+
+    double sc   = sin(chi);
+    double cc   = cos(chi);
+    double se   = sin(eta);
+    double ce   = cos(eta);
+    double gx   = g * (ct * cc - st * sc * ce);
+    double gy   = g * (st * cp * cc + ct * cp * sc * ce - sp * sc * se);
+    double gz   = g * (st * sp * cc + ct * sp * sc * ce + cp * sc * se);
+
+    double vx_2_t = wx - F1 * gx;
+    double vy_2_t = wy - F1 * gy;
+    double vz_2_t = wz - F1 * gz;
+    double v_2_t = sqrt(vx_2_t * vx_2_t + vy_2_t * vy_2_t + vz_2_t * vz_2_t);
+
+    double energy_2_t = 0.5 *  MASS(AR_FAST) * v_2_t * v_2_t;     // TODO
+
+    
+    if(energy_2_t > FA_E_THRESHOLD){
+        x[AR_FAST].push_back( xe );                                 // add new fast atom TODO: AR_FAST általánosabban
+        vx[AR_FAST].push_back( vx_2_t ); 
+        vy[AR_FAST].push_back( vy_2_t );
+        vz[AR_FAST].push_back( vz_2_t );
+
+        // TODO: remove energy from P field
+    }
+    else{ // TODO: add energy from P field
+    }
+}
+
 
 void backward_scattering(double &eta, double &chi){
       eta = TWO_PI * R01(MTgen);
@@ -724,7 +801,7 @@ void do_collision(const int species_index, const size_t part_index, int *e_index
             isotropic_scattering(species_index, sigma_threshold[species_index].at(coll_index), eta, chi, g);
         } 
             break;
-        case COLL_BACK: backward_scattering(eta, chi);
+        case COLL_BACK: {backward_scattering(eta, chi);}
             break;
         case COLL_ANISO:
             break;
@@ -756,6 +833,14 @@ void do_collision(const int species_index, const size_t part_index, int *e_index
             int product = sigma_product[species_index][0].at(coll_index);
             diss_attachment(species_index,product,part_index,is_lost);}
             break;
+        case COLL_ISO_FASTATOM: {
+                isotropic_scattering_fa(species_index, sigma_threshold[species_index].at(coll_index), eta, chi, g, xe, ct, st, cp, sp, F1, wx, wy, wz);
+            }
+            break;
+        case COLL_BACK_FASTATOM: {
+                backward_scattering_fa(species_index, sigma_threshold[species_index].at(coll_index), eta, chi, g, xe, ct, st, cp, sp, F1, wx, wy, wz);
+            }
+            break;
         default: cout << "Warning: collision type could not be identified !!!" << endl;
     }
 
@@ -774,9 +859,24 @@ void do_collision(const int species_index, const size_t part_index, int *e_index
     
         // post-collision velocity of the colliding electron
         
-        vx[species_index].at(part_index) = wx + F2 * gx;
-        vy[species_index].at(part_index) = wy + F2 * gy;
-        vz[species_index].at(part_index) = wz + F2 * gz;
+        double vx_1 = wx + F2 * gx;
+        double vy_1 = wy + F2 * gy;
+        double vz_1 = wz + F2 * gz;
+
+        vx[species_index].at(part_index) = vx_1;
+        vy[species_index].at(part_index) = vy_1;
+        vz[species_index].at(part_index) = vz_1;
+
+        if(species_index == AR_FAST){    // if fast atom slowed down below threshold, remove it 
+            double v_1 = sqrt(vx_1 * vx_1 + vy_1 * vy_1 + vz_1 * vz_1);
+            double energy_1 = 0.5 *  MASS(AR_FAST) * v_1 * v_1;     // TODO
+            if ( energy_1 < FA_E_THRESHOLD){
+                x[AR_FAST].at(part_index)  =  x[AR_FAST].back();  x[AR_FAST].pop_back();
+                vx[AR_FAST].at(part_index) = vx[AR_FAST].back(); vx[AR_FAST].pop_back();
+                vy[AR_FAST].at(part_index) = vy[AR_FAST].back(); vy[AR_FAST].pop_back();
+                vz[AR_FAST].at(part_index) = vz[AR_FAST].back(); vz[AR_FAST].pop_back();
+            }
+        }
     }
 
 }
@@ -1016,9 +1116,14 @@ void check_boundary_constant(int species){     // variant using constant R_ele, 
     size_t energy_index, side;
     int    p;
 
+    
     for(int k=(out_indexes[species].size()-1); k>=0; k--){
+        
+        
         p   = out_indexes[species].at(k);
+        
         pos = x[species].at(p);
+
         out = true;
         if (pos <= 0.0) {    // the paritcle is out at the powered electrode
             side = 0; 
@@ -1030,6 +1135,7 @@ void check_boundary_constant(int species){     // variant using constant R_ele, 
                 energy_index = static_cast<size_t>(energy / DE_FED);
                 if (energy_index < N_FED) { fed_pow[species].at(energy_index)++; }  // save FED at the grounded electrode
             }
+            if (species == AR_FAST) x[AR_FAST].at(p) *= -1;
         }     
         if (pos >= L  ) {    // the paritcle is out at the grounded electrode
             side = 1; 
@@ -1040,6 +1146,7 @@ void check_boundary_constant(int species){     // variant using constant R_ele, 
                 energy_index = static_cast<size_t>(energy / DE_FED);
                 if (energy_index < N_FED) { fed_gnd[species].at(energy_index)++; }  // save FED at the grounded electrode
             }
+            if (species == AR_FAST) x[AR_FAST].at(p) = L-(x[AR_FAST].at(p)-L);
         }
         if (species==ELE) {    // manage electron induced processes
             R = R01(MTgen);
@@ -1057,7 +1164,18 @@ void check_boundary_constant(int species){     // variant using constant R_ele, 
                 vz[ELE].push_back( RNDveloc(E_MASS) );
                 N_ele_emit[ELE][side]++;
             }
-        } else {    // manage ion induced processes
+        }
+        else if (species == AR_FAST) {
+            v_sqr  = SQR(vx[species].at(p)) + SQR(vy[species].at(p)) + SQR(vz[species].at(p));
+            double E_i = 0.5 * MASS(AR_FAST) * v_sqr;
+            double E_r = (1-ALPHA)*E_i+E_WALL*ALPHA;
+            double c0 = sqrt(E_r/E_i);
+            vx[AR_FAST].at(p) *= -c0;
+            vy[AR_FAST].at(p) *= c0;
+            vz[AR_FAST].at(p) *= c0;
+            out = false;
+        }
+        else {    // manage ion induced processes
             if (SURF_E_EMISSION[species][side] > 0.0){
                 double P_emit = SURF_E_EMISSION[species][side] * WEIGHT_FACTORS[species]/WEIGHT_FACTORS[ELE];
                 R = R01(MTgen);
@@ -1077,7 +1195,7 @@ void check_boundary_constant(int species){     // variant using constant R_ele, 
             vx[species].at(p) = vx[species].back(); vx[species].pop_back();
             vy[species].at(p) = vy[species].back(); vy[species].pop_back();
             vz[species].at(p) = vz[species].back(); vz[species].pop_back();
-        } 
+        }
     }
 }
 
@@ -1087,6 +1205,8 @@ void check_boundary_constant(int species){     // variant using constant R_ele, 
 //---------------------------------------------------------------------//
 
 void do_measurement(const int species, int t){
+    
+    if (DEBUG_MODE) cout << ">> 5.1" <<endl;
 
     size_t t_index = t/N_BIN;
     // first do the common part -- only for species == ELE
@@ -1098,7 +1218,7 @@ void do_measurement(const int species, int t){
     }
     // density - XT
     transform(next(n_xt[species].begin(), t_index*N_G),next(n_xt[species].begin(), (t_index+1)*N_G),density[species].begin(),next(n_xt[species].begin(), t_index*N_G),plus<double>());
-
+    
     double mean_v{}, rmodr{}, rmodl{}, e_x{}, velocity{}, v2{}, energy{}, rate{}, ratep{};
     size_t p{}, energy_index{};
 
@@ -1113,7 +1233,7 @@ void do_measurement(const int species, int t){
         rmodl  = 1.0-rmodr;                    // left-side remainder
         e_x    = rmodl * efield.at(p) + rmodr * efield.at(p+1);
         mean_v = vx[species].at(k) - 0.5*e_x*FACTOR_P(species);
-
+        if (DEBUG_MODE) cout << ">> 5.2" <<endl;
         // calculate current density -- mean velocity can be calculated from j(x,t)!
         j_xt[species].at(t_index*N_G+p)   += rmodl*mean_v;
         j_xt[species].at(t_index*N_G+p+1) += rmodr*mean_v;
@@ -1122,17 +1242,20 @@ void do_measurement(const int species, int t){
         v2 = SQR(mean_v);
         T_par_xt[species].at(t_index*N_G+p)   += rmodl*v2;
         T_par_xt[species].at(t_index*N_G+p+1) += rmodr*v2;
-
+        
         // calculate energy of particle
         v2     = SQR(mean_v) + SQR(vy[species].at(k)) + SQR(vz[species].at(k));
-        energy = 0.5*FACTOR_MQ(species)*v2;
+        energy = 0.5*MASS(species)*v2*J_TO_EV;
+        
 
+        if (DEBUG_MODE) cout << ">> 5.3" <<endl;
         // mean energy -- XT
         meane_xt[species].at(t_index*N_G+p)   += rmodl*energy;
         meane_xt[species].at(t_index*N_G+p+1) += rmodr*energy;
-
+        
         // calculate momentum loss, Pi_C_xt 
         energy_index = min(static_cast<int>(energy / DE_CS + 0.5), CS_RANGES-1);
+        if (DEBUG_MODE) cout << ">> 5.31 " << energy*J_TO_EV <<endl;
         velocity     = sqrt(v2);
         rate         = 0.0;
         ratep        = 0.0;
@@ -1141,10 +1264,11 @@ void do_measurement(const int species, int t){
             ratep += static_cast<double>(sigma_tot[species][t].at(energy_index))*target_density[t].at(p+1);
         } 
         rate        *= mean_v*velocity;
+        if (DEBUG_MODE) cout << ">> 5.32" <<endl;
         ratep        *= mean_v*velocity;
         Pi_C_xt[species].at(t_index*N_G+p)   -= rmodl*rate;
         Pi_C_xt[species].at(t_index*N_G+p+1) -= rmodr*ratep;
-
+        
         // process rate -- XT
         for (int i{0}; i<SAVE_XT_NUM[species]; i++){
             proc_index = SAVE_XT_PROCESS[species][i];
@@ -1155,7 +1279,7 @@ void do_measurement(const int species, int t){
                 process_xt[XT_counter+i].at(t_index*N_G+p+1) += rmodr*rate*target_density[sigma_target[species].at(proc_index)].at(p+1);
             }
         }
-
+        
         if(species==ELE){
             // EEPF and mean energy at center
             if ((MIN_X < x[species][k]) && (x[species][k] < MAX_X)){
@@ -1165,6 +1289,7 @@ void do_measurement(const int species, int t){
                 N_center_mean_energy++;
             }
         }
+        if (DEBUG_MODE) cout << ">> 5.4" <<endl;
     }
 }
 
@@ -1313,18 +1438,18 @@ void do_one_cycle (void){
     double   new_charge{0.0}, new_sigma{0.0}, gen_voltage{0.0};
     xvector  rho;
 
-
     for (int t{0}; t<N_T; t++){                                  // the RF period is divided into N_T equal time intervals (time step DT_E)
         Time += DT_E;                                           // update of the total simulated time
         
+        if (DEBUG_MODE) cout << ">> 1" <<endl;
         // step 1: compute densities at grid points
-        
         calc_particle_density(ELE);                             // electron density - computed in every time step
         if ((t % N_SUB) == 0) {                                 // ion density - computed in every N_SUB-th time steps (subcycling)
             for(int i{1}; i<N_SPECIES; ++i) calc_particle_density(i); 
         }
 
         // step 2: solve Poisson equation
+        if (DEBUG_MODE) cout << ">> 2" <<endl;
         
         fill(rho.begin(),rho.end(),0.0);
         for(int n{0}; n<N_G; ++n){
@@ -1346,14 +1471,14 @@ void do_one_cycle (void){
         }
         
         // steps 3 & 4: move particles according to electric field interpolated to particle positions
-        
+        if (DEBUG_MODE) cout << ">> 3 & 4" <<endl;
         move_particles(ELE);                                    // move all electrons in every time steps   
         if ((t % N_SUB) == 0) {                                 // move all ions in every N_SUB-th time steps (subcycling)
             for(int k{1}; k<N_SPECIES; ++k) move_particles(k); 
         }
 
         // step 5: check boundaries
-        
+        if (DEBUG_MODE) cout << ">> 5" <<endl;
         check_boundary_constant(ELE);                           // check boundaries for all electrons in every time step
         if ((t % N_SUB) == 0) {                                 // check boundaries for all ions in every N_s-th time steps (subcycling)
             for(int k{1}; k<N_SPECIES; ++k) check_boundary_constant(k);
@@ -1370,7 +1495,7 @@ void do_one_cycle (void){
         }
 
         // step 6: collisions
-        
+        if (DEBUG_MODE) cout << ">> 6" <<endl;
         // NULL-collision: select scattering particles
         for(int n{0}; n<N_SPECIES; n++){
             if ((n == ELE) || ((t % N_SUB) == 0)){
@@ -1389,7 +1514,7 @@ void do_one_cycle (void){
                 }
             }
         }
-
+        
         // electron collision
         for (int b{0}; b<N_TARGET; b++){ vx_a[b] = 0.0; vy_a[b] = 0.0; vz_a[b] = 0.0; } // in case of cold gas model
         for (int k{0}; k<Nc[ELE]; k++){                                   // loop over colliding electrons
@@ -1459,7 +1584,7 @@ void do_one_cycle (void){
             }
         }
     }
-       
+    
     fprintf(datafile,"%8d  ",cycle);
     for(int k{0}; k<N_SPECIES; ++k) fprintf(datafile, "%8zd  ",x[k].size());
     fprintf(datafile,"%E\n",bias);  
@@ -2278,7 +2403,7 @@ int main (int argc, char *argv[]){
 
     read_cross_sections();
     calc_total_cross_sections();
-    for(int i{0};i<N_SPECIES;++i) { test_cross_sections(i);} return 1;
+    //for(int i{0};i<N_SPECIES;++i) { test_cross_sections(i);} return 1;
 
     init_vectors();
 
