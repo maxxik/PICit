@@ -15,7 +15,8 @@ constexpr double      VOLTAGE         = 175.0;                      // voltage a
 constexpr double      L               = 0.025;                      // electrode gap [m]
 constexpr double      PRESSURE        = 62.0;                       // gas pressure [Pa]
 constexpr double      TEMPERATURE     = 350.0;                      // background gas temperature [K]
-constexpr double      WEIGHT_COM      = 1e5;                        // common weight of superparticles (see weight factors)
+constexpr double      T_WALL          = 300.0;                      // wall temperature
+constexpr double      WEIGHT_COM      = 7.0e4;                        // common weight of superparticles (see weight factors)
 constexpr double      ELECTRODE_AREA  = 1.0e-4;                     // (fictive) electrode area [m^2]
 constexpr int         N_INIT          = 1000;                      // number of initial electrons and ions
 constexpr int         N_SUB           = 20;                         // ions move only in these cycles (subcycling)
@@ -36,6 +37,8 @@ constexpr double      INV_DX          = 1.0 / DX;                               
 constexpr double      GAS_DENSITY     = PRESSURE / (K_BOLTZMANN * TEMPERATURE);    // background gas density [1/m^3]
 constexpr double      OMEGA           = TWO_PI * FREQUENCY;                        // angular frequency [rad/s]
 constexpr double      DV              = ELECTRODE_AREA * DX;                       // grod cell volume
+constexpr double      FA_E_THRESHOLD  = 9.0*3.0/2.0*K_BOLTZMANN*TEMPERATURE;       // energy threshold for fast atom generation
+constexpr double      E_WALL          = 3.0/2.0*K_BOLTZMANN*T_WALL;                // energy of wall temperatured target atom
 
 // simulation flags
 constexpr bool        SEEDING         = true;                         // additional seeding of particles to ignite plasma
@@ -49,12 +52,12 @@ constexpr int         SPECIES_KIND[N_SPECIES]   = { ELE, AR_ION, AR_FAST };
 constexpr double      DT[N_SPECIES]             = { DT_E, DT_I, DT_I};      // time steps
 constexpr double      WEIGHT_FACTORS[N_SPECIES] = { 1.0, 1.0, 15.0};         // superparticle weight factors
 constexpr string_view CS_FILES[N_SPECIES]       = { "ar_e_cs.bin",              // cs files to use (one for each species)
-                                                    "ar_arp_cs.bin",
+                                                    "ar_arp_fa_cs.bin",
                                                     "arf_ar_cs.bin"};     
 
-constexpr int         N_TARGET                  = 1;                               // number of collision target (background) species
+constexpr int         N_TARGET                  = 1;                             // number of collision target (background) species
 constexpr int         TARGET_KIND[N_TARGET]     = { AR_GAS };                    // materials of collision target (background) species
-constexpr double      TARGET_RATIO[N_TARGET]    = { 1.0 };                             // concentrations of collision target (background) species
+constexpr double      TARGET_RATIO[N_TARGET]    = { 1.0 };                       // concentrations of collision target (background) species
 
 // metastable background definition
 constexpr int         META_T_INDEX        = 0;       // index of metastable target, set to 0 for skipping metastable calculation
@@ -65,8 +68,8 @@ constexpr double      META_DIFF_0         = 0.015;   // O2 metastable diffusion 
 constexpr double      META_REFLECTION     = 0.994;
 
 // XT measurement definition
-constexpr int         SAVE_XT_NUM[N_SPECIES]         = { 0, 0, 0};            // number of processes for XT analysis (max 10 for each species)
-constexpr int         SAVE_XT_PROCESS[N_SPECIES][10] = { {},{} };        // list of processes for XT analysis 
+constexpr int         SAVE_XT_NUM[N_SPECIES]         = { 0, 0, 0};               // number of processes for XT analysis (max 10 for each species)
+constexpr int         SAVE_XT_PROCESS[N_SPECIES][10] = { {},{} };                // list of processes for XT analysis 
 constexpr int         SAVE_XT_TOT                    = SUM_ARRAY(SAVE_XT_NUM);   // total number of process XT-s to store
 
 // surface coefficients
@@ -75,7 +78,8 @@ constexpr double      SURF_NORMAL[N_SIDES] = {1.0, -1.0};           // surface n
 constexpr double      SURF_R_ELE[N_SIDES]  = {0.7, 0.7};            // elastic electron reflection coefficients on two sides
 constexpr double      SURF_E_EMISSION[N_SPECIES][N_SIDES] = { {0.0, 0.0},    // secondary electron emission yields
                                                               {0.07, 0.07},
-                                                              {0.0, 0.0} }; // TODO        
+                                                              {0.0, 0.0} };
+constexpr double      ALPHA                 = 0.5;                  // Accomodation coefficient @@@ 
 
 // Verboncoeour type solution of the Poisson equation
 constexpr double      RESISTANCE   = 0.0;                           // resistor
