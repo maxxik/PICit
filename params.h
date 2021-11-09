@@ -10,15 +10,14 @@ constexpr string_view MESSAGE = "PICit! - 1d3v electrostatic PIC/MCC plasma simu
 // case parameters
 constexpr int         N_G             = 512;                        // number of grid points
 constexpr int         N_T             = 4000;                       // time steps within an RF period
-constexpr double      FREQUENCY       = 10.0e6;                     // driving frequency [Hz]
-constexpr double      VOLTAGE         = 175.0;                      // voltage amplitude [V]
+constexpr double      FREQUENCY       = 13.56e6;                     // driving frequency [Hz]
+constexpr double      VOLTAGE         = 250.0;                      // voltage amplitude [V]
 constexpr double      L               = 0.025;                      // electrode gap [m]
-constexpr double      PRESSURE        = 62.0;                       // gas pressure [Pa]
-constexpr double      TEMPERATURE     = 350.0;                      // background gas temperature [K]
+constexpr double      PRESSURE        = 10.0;                       // gas pressure [Pa]
 constexpr double      T_WALL          = 300.0;                      // wall temperature
-constexpr double      WEIGHT_COM      = 7.0e4;                        // common weight of superparticles (see weight factors)
+constexpr double      WEIGHT_COM      = 7.0e4;                      // common weight of superparticles (see weight factors)
 constexpr double      ELECTRODE_AREA  = 1.0e-4;                     // (fictive) electrode area [m^2]
-constexpr int         N_INIT          = 1000;                      // number of initial electrons and ions
+constexpr int         N_INIT          = 1000;                       // number of initial electrons and ions
 constexpr int         N_SUB           = 20;                         // ions move only in these cycles (subcycling)
 
 const int             N_EEPF  = 2000;                               // number of energy bins in Electron Energy Probability Function (EEPF)
@@ -34,10 +33,9 @@ constexpr double      DT_E            = PERIOD / (double)(N_T);                 
 constexpr double      DT_I            = N_SUB * DT_E;                              // ion time step [s]
 constexpr double      DX              = L / (double)(N_G - 1);                     // spatial grid division [m]
 constexpr double      INV_DX          = 1.0 / DX;                                  // inverse of spatial grid size [1/m]
-constexpr double      GAS_DENSITY     = PRESSURE / (K_BOLTZMANN * TEMPERATURE);    // background gas density [1/m^3]
+constexpr double      GAS_DENSITY     = PRESSURE / (K_BOLTZMANN * T_WALL);         // background gas density [1/m^3]
 constexpr double      OMEGA           = TWO_PI * FREQUENCY;                        // angular frequency [rad/s]
 constexpr double      DV              = ELECTRODE_AREA * DX;                       // grod cell volume
-constexpr double      FA_E_THRESHOLD  = 9.0*3.0/2.0*K_BOLTZMANN*TEMPERATURE;       // energy threshold for fast atom generation
 constexpr double      E_WALL          = 3.0/2.0*K_BOLTZMANN*T_WALL;                // energy of wall temperatured target atom
 
 // simulation flags
@@ -49,8 +47,8 @@ constexpr bool        COULOMB_COLL    = false;                        // Coulomb
 // species identifiers
 constexpr int         N_SPECIES                 = 3;                              // number of species in the simulation
 constexpr int         SPECIES_KIND[N_SPECIES]   = { ELE, AR_ION, AR_FAST };
-constexpr double      DT[N_SPECIES]             = { DT_E, DT_I, DT_I};      // time steps
-constexpr double      WEIGHT_FACTORS[N_SPECIES] = { 1.0, 1.0, 15.0};         // superparticle weight factors
+constexpr double      DT[N_SPECIES]             = { DT_E, DT_I, DT_I};          // time steps
+constexpr double      WEIGHT_FACTORS[N_SPECIES] = { 1.0, 1.0, 30.0};            // superparticle weight factors
 constexpr string_view CS_FILES[N_SPECIES]       = { "ar_e_cs.bin",              // cs files to use (one for each species)
                                                     "ar_arp_fa_cs.bin",
                                                     "arf_ar_cs.bin"};     
@@ -103,4 +101,13 @@ constexpr int         CS_RANGES            = 1000000;               // number of
 constexpr double      DE_CS                = 0.001;                 // energy division in cross section arrays [eV]
 constexpr int         CS_STRING_LENGTH     = 128;                   // length of comment strings
 
-
+// constants for temperature calculation
+constexpr int         MAX_ITER             = 100;                        // Maximum number of iteration allowed during heat equation solving (boundary condition fitting)
+const double          KAPPA                = 0.0177;                     // Thermal conductivity for argon gas [W/(m K)]
+const double          cp                   = 20.7849;                    // Specific heat of Ar at const pressure [J /(K mol)]
+const double          R                    = 8.31446261;                 // Universal gas constant [J /(K mol)]
+const double          KHI0                 = 0.6505e-23;                 //
+const double          KHI                  = (cp+1.25*R)/(cp-0.5*R);     //
+const double          SIGMA_T              = 42e-20;                     // Total cross section for Ar/Ar collisions [m^2]
+const double          LAMBDA               = (2-ALPHA)/ALPHA*KHI*KHI0*T_WALL/(PRESSURE*SIGMA_T);     // Constant for thermal boundary condition
+const double          FA_E_THRESHOLD_FACTOR= 9.0*3.0/2.0*K_BOLTZMANN;    // Factor for fast atom thershold energy calculation

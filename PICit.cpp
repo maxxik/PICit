@@ -64,6 +64,8 @@ typedef array<double,N_G> xvector;                           // array for quanti
 xvector          efield, pot;                                // electric field and potential
 xvector          density [N_SPECIES];                        // particle densities
 xvector          cumul_density [N_SPECIES];                  // cumulative densities
+xvector          pfield,temp;                                // thermal power input and temperature field
+
 
 xvector          target_density [N_TARGET];                  // target (background) species densities
 double           max_target_density [N_TARGET];              // peak target (background) species densities
@@ -98,6 +100,7 @@ xt_distr  u_xt[N_SPECIES];                                   // XT distributions
 xt_distr  j_xt[N_SPECIES];                                   // XT distributions for current
 xt_distr  power_xt[N_SPECIES];                               // XT distributions for power absorption
 xt_distr  meane_xt[N_SPECIES];                               // XT distributions for mean energies
+xt_distr  pfield_xt;                                         // XT distributions for thermal power input field
 
 // For Boltzmann term analysis
 
@@ -135,6 +138,8 @@ FILE     *datafile;                                          // used for saving 
 bool     measurement_mode;                                   // flag that controls measurements and data saving
 
 bool     DEBUG_MODE = false;
+double   mean_temp  = T_WALL;                                // mean gas temperature
+double   FA_E_THRESHOLD  = FA_E_THRESHOLD_FACTOR*mean_temp;  // fast atom thershold energy calculation
 
 
 //---------------------------------------------------------------------------//
@@ -148,7 +153,7 @@ std::mt19937 MTgen(rd());
 std::uniform_real_distribution<> R01(0.0, 1.0);
 std::normal_distribution<> RMB(0.0, 1.0);
 
-double RNDveloc (const double mass, const double temp = TEMPERATURE){
+double RNDveloc (const double mass, const double temp = mean_temp){
     return RMB(MTgen) * sqrt(K_BOLTZMANN * temp / mass);
 }
 
@@ -398,6 +403,7 @@ void init_vectors(void){
     if(measurement_mode){
         fill(pot_xt.begin(), pot_xt.end(), 0.0);
         fill(efield_xt.begin(), efield_xt.end(), 0.0);
+        fill(pfield_xt.begin(), pfield_xt.end(), 0.0);
         for (int i{0}; i<SAVE_XT_TOT; i++)
             fill(process_xt[i].begin(), process_xt[i].end(), 0.0);
     }
@@ -529,9 +535,8 @@ void ionization_equalshare(const int species_index, const int product_index, con
     }
 }
 
-// @@@
 void isotropic_scattering_fa(const int species_index, const double E_threshold, double &eta, double &chi, double &g, const double xe,
- const double ct, const double st, const double cp, const double sp, const double F1, const double wx, const double wy, const double wz){
+ const double ct, const double st, const double cp, const double sp, const double F1, const double wx, const double wy, const double wz, const double energy_1_t){
 
     if(E_threshold != 0.0){
         double energy = 0.5 * MASS(species_index) * g * g;      // projectile energy
@@ -552,26 +557,45 @@ void isotropic_scattering_fa(const int species_index, const double E_threshold, 
     double vx_2_t = wx - F1 * gx;
     double vy_2_t = wy - F1 * gy;
     double vz_2_t = wz - F1 * gz;
-    double v_2_t = sqrt(vx_2_t * vx_2_t + vy_2_t * vy_2_t + vz_2_t * vz_2_t);
 
-    double energy_2_t = 0.5 *  MASS(AR_FAST) * v_2_t * v_2_t;     // TODO
+    double energy_2_t = 0.5 *  MASS(AR_FAST) * (vx_2_t * vx_2_t + vy_2_t * vy_2_t + vz_2_t * vz_2_t);
 
-    
-    if(energy_2_t > FA_E_THRESHOLD){
-        x[AR_FAST].push_back( xe );                                 // add new fast atom TODO: AR_FAST általánosabban
-        vx[AR_FAST].push_back( vx_2_t ); 
-        vy[AR_FAST].push_back( vy_2_t );
-        vz[AR_FAST].push_back( vz_2_t );
+    if (R01(MTgen) < WEIGHT_FACTORS[AR_ION]/WEIGHT_FACTORS[AR_FAST]){ // TODO AR SPECIFIC
+        double rmodr{}, rmodl{};
+        size_t p{};
 
-        // TODO: remove energy from P field
-    }
-    else{ // TODO: add energy from P field
+        if(energy_2_t > FA_E_THRESHOLD){ // add new fast atom and remove its energy from P field
+            x[AR_FAST].push_back( xe );
+            vx[AR_FAST].push_back( vx_2_t ); 
+            vy[AR_FAST].push_back( vy_2_t );
+            vz[AR_FAST].push_back( vz_2_t );
+
+            rmodr  = xe * INV_DX;
+            p      = static_cast<size_t>(rmodr);
+            rmodr  -= floor(rmodr);                // right-side remainder
+            rmodl  = 1.0-rmodr;                    // left-side remainder
+            double dp = energy_2_t/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
+            pfield.at(p)   -= rmodl * dp;
+            pfield.at(p+1) -= rmodr * dp;
+            
+        }
+        else{ // atom not fast enough, add its extra energy to P field
+
+            rmodr  = xe * INV_DX;
+            p      = static_cast<size_t>(rmodr);
+            rmodr  -= floor(rmodr);                // right-side remainder
+            rmodl  = 1.0-rmodr;                    // left-side remainder
+            double dp = (energy_2_t-energy_1_t)/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
+            pfield.at(p)   += rmodl * dp;
+            pfield.at(p+1) += rmodr * dp;
+
+         }
     }
 }
 
 // @@@
 void backward_scattering_fa(const int species_index, const double E_threshold, double &eta, double &chi, double &g, const double xe,
- const double ct, const double st, const double cp, const double sp, const double F1, const double wx, const double wy, const double wz){
+ const double ct, const double st, const double cp, const double sp, const double F1, const double wx, const double wy, const double wz, const double energy_1_t){
 
     chi  = PI;                                              // scattering angle for scattered projectile
     eta  = TWO_PI * R01(MTgen);                             // azimuthal angle for scattered projectile
@@ -592,15 +616,36 @@ void backward_scattering_fa(const int species_index, const double E_threshold, d
     double energy_2_t = 0.5 *  MASS(AR_FAST) * v_2_t * v_2_t;     // TODO
 
     
-    if(energy_2_t > FA_E_THRESHOLD){
-        x[AR_FAST].push_back( xe );                                 // add new fast atom TODO: AR_FAST általánosabban
-        vx[AR_FAST].push_back( vx_2_t ); 
-        vy[AR_FAST].push_back( vy_2_t );
-        vz[AR_FAST].push_back( vz_2_t );
+    if (R01(MTgen) < WEIGHT_FACTORS[AR_ION]/WEIGHT_FACTORS[AR_FAST]){ // TODO AR SPECIFIC
+        double rmodr{}, rmodl{};
+        size_t p{};
 
-        // TODO: remove energy from P field
-    }
-    else{ // TODO: add energy from P field
+        if(energy_2_t > FA_E_THRESHOLD){ // add new fast atom and remove its energy from P field
+            x[AR_FAST].push_back( xe );
+            vx[AR_FAST].push_back( vx_2_t ); 
+            vy[AR_FAST].push_back( vy_2_t );
+            vz[AR_FAST].push_back( vz_2_t );
+
+            rmodr  = xe * INV_DX;
+            p      = static_cast<size_t>(rmodr);
+            rmodr  -= floor(rmodr);                // right-side remainder
+            rmodl  = 1.0-rmodr;                    // left-side remainder
+            double dp = energy_2_t/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
+            pfield.at(p)   -= rmodl * dp;
+            pfield.at(p+1) -= rmodr * dp;
+            
+        }
+        else{ // atom not fast enough, add its extra energy to P field
+
+            rmodr  = xe * INV_DX;
+            p      = static_cast<size_t>(rmodr);
+            rmodr  -= floor(rmodr);                // right-side remainder
+            rmodl  = 1.0-rmodr;                    // left-side remainder
+            double dp = (energy_2_t-energy_1_t)/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
+            pfield.at(p)   += rmodl * dp;
+            pfield.at(p+1) += rmodr * dp;
+            
+        }
     }
 }
 
@@ -614,7 +659,7 @@ void detachment(const int species_index, const int target_index, const int produ
 const double &E_threshold, double &eta, double &chi, double &g,
 const double &ct, const double &st, const double &cp, const double &sp, const double &F2, const double &wx, const double &wy, const double &wz){
 
-    double prod_init_energy = 1.5*K_BOLTZMANN*TEMPERATURE; // initial energy of product particle???
+    double prod_init_energy = 1.5*K_BOLTZMANN*mean_temp; // initial energy of product particle???
     double g1 = sqrt(2.0*prod_init_energy/MASS(product_index));
     
     double ratio = WEIGHT_FACTORS[species_index]/WEIGHT_FACTORS[product_index];  // determine how many targets need to vanish
@@ -834,11 +879,13 @@ void do_collision(const int species_index, const size_t part_index, int *e_index
             diss_attachment(species_index,product,part_index,is_lost);}
             break;
         case COLL_ISO_FASTATOM: {
-                isotropic_scattering_fa(species_index, sigma_threshold[species_index].at(coll_index), eta, chi, g, xe, ct, st, cp, sp, F1, wx, wy, wz);
+                double energy_t = 0.5 * MASS(AR_FAST) * (vx_t[target_index] * vx_t[target_index] + vy_t[target_index] * vy_t[target_index] + vz_t[target_index] * vz_t[target_index]);
+                isotropic_scattering_fa(species_index, sigma_threshold[species_index].at(coll_index), eta, chi, g, xe, ct, st, cp, sp, F1, wx, wy, wz, energy_t);
             }
             break;
         case COLL_BACK_FASTATOM: {
-                backward_scattering_fa(species_index, sigma_threshold[species_index].at(coll_index), eta, chi, g, xe, ct, st, cp, sp, F1, wx, wy, wz);
+                double energy_t = 0.5 * MASS(AR_FAST) * (vx_t[target_index] * vx_t[target_index] + vy_t[target_index] * vy_t[target_index] + vz_t[target_index] * vz_t[target_index]);
+                backward_scattering_fa(species_index, sigma_threshold[species_index].at(coll_index), eta, chi, g, xe, ct, st, cp, sp, F1, wx, wy, wz, energy_t);
             }
             break;
         default: cout << "Warning: collision type could not be identified !!!" << endl;
@@ -868,13 +915,25 @@ void do_collision(const int species_index, const size_t part_index, int *e_index
         vz[species_index].at(part_index) = vz_1;
 
         if(species_index == AR_FAST){    // if fast atom slowed down below threshold, remove it 
-            double v_1 = sqrt(vx_1 * vx_1 + vy_1 * vy_1 + vz_1 * vz_1);
-            double energy_1 = 0.5 *  MASS(AR_FAST) * v_1 * v_1;     // TODO
+            double energy_1 = 0.5 *  MASS(AR_FAST) * (vx_1 * vx_1 + vy_1 * vy_1 + vz_1 * vz_1);     // TODO
             if ( energy_1 < FA_E_THRESHOLD){
                 x[AR_FAST].at(part_index)  =  x[AR_FAST].back();  x[AR_FAST].pop_back();
                 vx[AR_FAST].at(part_index) = vx[AR_FAST].back(); vx[AR_FAST].pop_back();
                 vy[AR_FAST].at(part_index) = vy[AR_FAST].back(); vy[AR_FAST].pop_back();
                 vz[AR_FAST].at(part_index) = vz[AR_FAST].back(); vz[AR_FAST].pop_back();
+
+                // add its energy back to P field
+                double rmodr{}, rmodl{};
+                size_t p{};
+
+                rmodr  = xe * INV_DX;
+                p      = static_cast<size_t>(rmodr);
+                rmodr  -= floor(rmodr);                // right-side remainder
+                rmodl  = 1.0-rmodr;                    // left-side remainder
+                double dp = (energy_1)/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
+                pfield.at(p)   += rmodl * dp;
+                pfield.at(p+1) += rmodr * dp;
+
             }
         }
     }
@@ -935,6 +994,90 @@ void solve_Poisson (const xvector &rho1, double Voltage, double conv_charge=0.0)
     efield.back()  = (pot.at(N_G-2) - pot.at(N_G-1)) * INV_DX + rho1.at(N_G-1) * DX / (2.0 * EPSILON0);   // grounded electrode
 }
 
+
+
+//-----------------------------------------------------------------//
+// solve heat equation (Thomas algorithm)                      @@@ //
+//-----------------------------------------------------------------//
+
+void solve_heat (xvector pfield1, double tt, double Tg_0, double Tg_L, int iter){
+
+    if(iter >= MAX_ITER){
+        printf(">> eduPIC: Error: Maximum number of iteration reached while solving the heat equation.\n");
+        exit(0);
+    }
+
+    printf("Temp in %f %f, iteration: %d\n", Tg_0, Tg_L, iter);
+    const double A =  1.0;
+    const double B = -2.0;
+    const double C =  1.0;
+    const double S = 1.0 / (2.0 * DX);
+    const double ALPHA = -DX * DX / (KAPPA*tt);
+    const double LAMBDADX = LAMBDA/DX;
+    xvector temp2;
+    xvector      g, w, f;
+    int          i;
+
+    for(i=0; i<N_G; i++){
+        temp2.at(i) = temp.at(i);
+    }
+    
+    temp2.front()     = Tg_0;
+    temp2.back()      = Tg_L; 
+    
+
+    // solve Heat equation
+    
+    for(i=1; i<=N_G-2; i++) f.at(i) = ALPHA * pfield1.at(i);
+    f.at(1) -= temp2[0];
+    f.at(N_G-2) -= temp2[N_G-1];
+    w.at(1) = C/B;
+    g.at(1) = f.at(1)/B;
+    for(i=2; i<=N_G-2; i++){
+        w.at(i) = C / (B - A * w.at(i-1));
+        g.at(i) = (f.at(i) - A * g.at(i-1)) / (B - A * w.at(i-1));
+    }
+    temp2.at(N_G-2) = g.at(N_G-2);
+    for (i=N_G-3; i>0; i--) temp2.at(i) = g.at(i) - w.at(i) * temp2.at(i+1);            // potential at the grid points between the electrodes
+
+    double Tg_0_calc = (temp2.at(1)-temp2.front())*LAMBDADX + T_WALL;
+    double Tg_L_calc = (temp2.at(N_G-2)-temp2.back())*LAMBDADX + T_WALL;
+    
+    if(abs(Tg_0_calc-temp2.front())/Tg_0_calc > 1e-6 || abs(Tg_L_calc-temp2.back())/Tg_L_calc > 1e-6){
+        solve_heat(pfield1, tt, Tg_0_calc, Tg_L_calc, iter+1);
+    }
+    else{
+        for(i=0; i<N_G; i++){
+            temp.at(i) = temp2.at(i);
+        }
+        printf("Final temp %f %f\n", temp.front(), temp.back());
+    }
+    
+}
+
+void temp_calc()
+{
+    solve_heat(pfield, ((double)no_of_cycles)*PERIOD, temp.front(), temp.back(), 0);
+
+    for (int t{0}; t<N_TARGET; t++){
+        if (t == AR_GAS){
+                // calculate gas density from gas temperature
+                for (int k=0; k<N_G; k++){
+                    target_density[AR_GAS].at(k) = PRESSURE / (K_BOLTZMANN * temp.at(k));
+                }
+            }
+    }
+    cout << ">> PICit: solving heat equation..." << endl;
+}
+
+void mean_temp_calc(){
+    mean_temp = 0;
+    for (int k=0; k<N_G; k++){
+        mean_temp += temp.at(k);
+    }
+    mean_temp /= N_G;
+    FA_E_THRESHOLD  = 9.0*3.0/2.0*K_BOLTZMANN*mean_temp;       // energy threshold
+}
 
 //---------------------------------------------------------------------//
 // calculate particle densitiy distributions from particle positions   //
@@ -1487,6 +1630,10 @@ void do_one_cycle (void){
         //Do measurements
         if(measurement_mode){
             for(int k{0}; k<N_SPECIES; ++k) do_measurement(k,t);
+
+//            for (p=0; p<N_G; p++) {
+//                pfield_xt[p][t_index] += pfield[p];
+//            }
         }
         
         // accumulate metastable source
@@ -1616,8 +1763,8 @@ void update_target_densities(const int act_cycle, const int total_cycle){
             constexpr double A =  1.0;
             constexpr double B = -2.0;
             constexpr double C =  1.0;
-            const double Diff_meta   = META_DIFF_0 * pow(TEMPERATURE/300.0,1.5) / PRESSURE;   // Diffusion coeffient
-            const double v_avg       = sqrt(3.0*K_BOLTZMANN*TEMPERATURE/TARGET_MASS(META_T_INDEX));     // avg speed
+            const double Diff_meta   = META_DIFF_0 * pow(mean_temp/300.0,1.5) / PRESSURE;   // Diffusion coeffient
+            const double v_avg       = sqrt(3.0*K_BOLTZMANN*mean_temp/TARGET_MASS(META_T_INDEX));     // avg speed
 	        const double lambda_meta = 2.0 * Diff_meta / v_avg;                                         // mean free path
 	        const double beta_meta   = lambda_meta * (1.0 + META_REFLECTION) / (1.0 - META_REFLECTION) / SQRT3;
             const double ALPHA       = -DX * DX / Diff_meta;
@@ -1653,8 +1800,6 @@ void update_target_densities(const int act_cycle, const int total_cycle){
     calc_max_coll_probability();
 }
 
-
-
 //---------------------------------------------------------------------//
 // save particle coordinates                                           //
 //---------------------------------------------------------------------//
@@ -1681,6 +1826,11 @@ void save_particle_data(void){
         fwrite(vy[n].data(),sizeof(double),Np,f);
         fwrite(vz[n].data(),sizeof(double),Np,f);
     }
+
+    // save temperature vector
+    fwrite(&N_G,sizeof(double),1,f);
+    fwrite(temp.data(), sizeof(double),N_G,f);
+
     fclose(f);
     printf(">> PICit! data saved : %zd electrons %zd ions, %d cycles completed, time is %e [s]\n", x[ELE].size(), x[1].size(), cycles_done, Time);
     printf(">> PICit! data saved : old_Q = %e, Q = %e, SIGMA = %e, QCONV = %e\n",old_old_charge,old_charge,old_sigma,qpow);
@@ -1716,6 +1866,11 @@ void load_particle_data(void){
         vz[n].resize(Np);
         a = fread(vz[n].data(), sizeof(double),Np,f);
     }
+
+    // load temperature vector
+    a = fread(&d,sizeof(double),1,f);
+    a = fread(temp.data(),  sizeof(double),N_G,f);
+
     (void)a;
     fclose(f);
     printf(">> PICit: data loaded : %zd electrons %zd ions, %d cycles completed before, time is %e [s]\n", x[ELE].size(), x[1].size(), cycles_done, Time);
@@ -1791,6 +1946,22 @@ void save_density(void){
         }
         fclose(f);
     }
+
+
+void save_xvector(xvector& vec, const string& fname){
+        FILE    *f;
+        size_t   i,j;
+        
+        f = fopen(fname.c_str(),"w");
+        for (i=0; i<N_G; i++){
+            fprintf(f,"%8.5f  ", i*DX);
+            fprintf(f,"%e", vec.at(i));
+            fprintf(f,"\n");
+        }
+        fclose(f);
+        cout << "   Saving " << fname << "...\n";
+    }
+
 
 //---------------------------------------------------------------------//
 // save EEPF data                                                      //
@@ -2279,7 +2450,7 @@ void save_info(void){
     fprintf(f,"# of electron / ion time steps        = %12d\n",      N_SUB);
     fprintf(f,"Voltage amplitude                     = %12e [V]\n",  VOLTAGE);
     fprintf(f,"Pressure                              = %12e [Pa]\n", PRESSURE);
-    fprintf(f,"Temperature                           = %12e [K]\n",  TEMPERATURE);
+    fprintf(f,"Mean temperature                      = %12e [K]\n",  mean_temp);
     fprintf(f,"perpendicular B-field                 = %12e [T]\n",  B_FIELD);
     for (int t{0}; t<N_TARGET; t++)
         fprintf(f,"initial target gas composition [%2d]   = %12.2f %% (%s)\n", t, 100.0*TARGET_RATIO[t], MATERIALS[TARGET_KIND[t]].name.data());
@@ -2352,8 +2523,8 @@ void save_info(void){
         fprintf(f,"META_CYCLE_SKIP            = %d\n", META_CYCLE_SKIP); 
         fprintf(f,"META_DIFF_0 (1 Pa, 300K)   = %e\n", META_DIFF_0); 
         fprintf(f,"META_REFLECTION            = %e\n", META_REFLECTION); 
-        double Diff_meta   = META_DIFF_0 * pow(TEMPERATURE/300.0,1.5) / PRESSURE;
-        double v_avg       = sqrt(3.0*K_BOLTZMANN*TEMPERATURE/TARGET_MASS(META_T_INDEX));
+        double Diff_meta   = META_DIFF_0 * pow(mean_temp/300.0,1.5) / PRESSURE;
+        double v_avg       = sqrt(3.0*K_BOLTZMANN*mean_temp/TARGET_MASS(META_T_INDEX));
         double lambda_meta = 2.0 * Diff_meta / v_avg;
         double beta_meta   = lambda_meta * (1.0 + META_REFLECTION) / (1.0 - META_REFLECTION) / SQRT3;
         fprintf(f,"--- derived ----\n"); 
@@ -2422,6 +2593,8 @@ int main (int argc, char *argv[]){
         b<<scientific<<0.0;
         b.close();
 
+        fill(temp.begin(), temp.end(), T_WALL);           // initialize temperature vector
+
         for (int i=0; i<N_TARGET; i++){                    // initialize background gas densities
             fill(target_density[i].begin(), target_density[i].end(), GAS_DENSITY*TARGET_RATIO[i]); //for o3a target_ratio is 0!
             for(size_t k{1};k<N_SPECIES;++k){
@@ -2463,6 +2636,8 @@ int main (int argc, char *argv[]){
         no_of_cycles = arg1;                              // run number of cycles specified in command line
         load_target_densities();                          // read previous target densitites from file
         load_particle_data();                             // read previous configuration from file
+        mean_temp_calc();                                 // calculate mean temperature
+
         cout << ">> PICit! running "<< no_of_cycles <<" cycle(s)" << endl;
         for (cycle=cycles_done+1;cycle<=cycles_done+no_of_cycles;cycle++) {
             if(SEEDING && x[ELE].size() < N_INIT){ init_seed(N_INIT,true); } 
@@ -2470,7 +2645,11 @@ int main (int argc, char *argv[]){
             update_target_densities(cycle-cycles_done, cycle);
         }
         cycles_done += no_of_cycles;
+        temp_calc();
+        save_xvector(temp, "temp.dat"); 
+        save_xvector(pfield, "pfield.dat");
     }
+
     fclose(datafile);
     if(alpha_0==0)
     calculate_bias(bias);
