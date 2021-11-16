@@ -1,0 +1,8 @@
+if ! command -v icpc &> /dev/null
+then
+    echo "compiling with g++"
+    g++ -O2 -std=c++17 -o csp csp.cpp
+else
+    echo "compiling with Intel C++ compiler"
+    icpc -O2 -std=c++17 -o csp csp.cpp
+fi

@@ -1,0 +1,8 @@
+if ! command -v icpc &> /dev/null
+then
+    echo "compiling with g++"
+    g++ -O3 -std=c++17 -mtune=native -o PICit PICit.cpp
+else
+    echo "compiling with Intel C++ compiler"
+    icpc -O2 -shared-intel -xHOST -simd -std=c++17 -o PICit PICit.cpp
+fi

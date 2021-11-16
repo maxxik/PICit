@@ -1,0 +1,204 @@
+
+PICit! - 1d3v electrostatic PIC/MCC plasma simulation @ Wigner RCP
+>> PICit! starting...
+>> PICit! measurement mode: off
+>> PICit! Loading cross-sections for 3 species
+   Loading cross-sections from file ar_e_cs.bin
+     Cross-section name:  pre-processed cross section data
+     Interpolation type:  FUNCTION
+     Additional comments: ELE + AR complete set based on Phelps formulas
+     Energy resolution:   0.001 eV
+     Total data sets:     3
+     Data points per set: 1000000
+      0. > e + Ar -> e + Ar  isotropic elastic / type: 0 / target: Argon_gas / E_th: 0.000000e+00
+      1. > e + Ar -> e + Ar*  isotropic excitation / type: 0 / target: Argon_gas / E_th: 1.150000e+01
+      2. > e + Ar -> e + e + Ar+  ionization / type: 3 / target: Argon_gas / E_th: 1.580000e+01 / product(0): electron / product(1): Argon_ion
+     Selected for XT-analysis: none
+   Loading cross-sections from file ar_arp_fa_cs.bin
+     Cross-section name:  pre-processed cross section data
+     Interpolation type:  FUNCTION
+     Additional comments: AR+ + AR complete set based on Phelps formulas (1994 JAP paper)
+     Energy resolution:   1.000000e-03 eV
+     Total data sets:     2
+     Data points per set: 1000000
+      0. > Ar+ + Ar -> Ar+ + Ar  isotropic elastic FA / type: 11 / target: Argon_gas / E_th: 0.000000e+00
+      1. > Ar+ + Ar -> Ar+ + Ar  backward elastic FA / type: 12 / target: Argon_gas / E_th: 0.000000e+00
+     Selected for XT-analysis: none
+   Loading cross-sections from file arf_ar_cs.bin
+     Cross-section name:  pre-processed cross section data
+     Interpolation type:  LOG
+     Additional comments: Ar fast + AR complete set from TODO @ LxCat
+     Energy resolution:   1.000000e-03 eV
+     Total data sets:     1
+     Data points per set: 1000000
+      0. > Ar / type: 11 / target: Argon_gas / E_th: 0.000000e+00
+     Selected for XT-analysis: none
+>> PICit! interaction matrix (No. of cross-processes):
+     proj \ targ |     Argon_gas | 
+   --------------------------------
+        electron |             3 | 
+       Argon_ion |             2 | 
+   Argon_fast_atom |             1 | 
+   --------------------------------
+>> PICit! target densities loaded 
+      max densities:    2.41e+21 (Argon_gas)  
+      max coll probabilities: 
+          electron:     1.47e-02 
+         Argon_ion:     1.65e-02 
+      Argon_fast_atom:     7.11e-04 
+>> PICit: data loaded : 5151 electrons 8899 ions, 1 cycles completed before, time is 7.374631e-08 [s]
+>> PICit! data loaded : old_Q = 0.000000e+00, Q = 0.000000e+00, SIGMA = 0.000000e+00, QCONV = 0.000000e+00
+>> PICit! running 500 cycle(s)
+ c =        2  t =        0  #e =     5150  #i[1] =     8898  #i[2] =        4   V =  250.000
+ c =        2  t =     1000  #e =     5455  #i[1] =     9502  #i[2] =       13   V =    0.000
+ c =        2  t =     2000  #e =     6387  #i[1] =    10536  #i[2] =       19   V = -250.000
+ c =        2  t =     3000  #e =     6610  #i[1] =    10819  #i[2] =       25   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        3  t =        0  #e =     7317  #i[1] =    11595  #i[2] =       39   V =  250.000
+ c =        3  t =     1000  #e =     7590  #i[1] =    11893  #i[2] =       51   V =    0.000
+ c =        3  t =     2000  #e =     8274  #i[1] =    12566  #i[2] =       62   V = -250.000
+ c =        3  t =     3000  #e =     8476  #i[1] =    12759  #i[2] =       80   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        4  t =        0  #e =     9081  #i[1] =    13339  #i[2] =       88   V =  250.000
+ c =        4  t =     1000  #e =     9294  #i[1] =    13542  #i[2] =      112   V =    0.000
+ c =        4  t =     2000  #e =     9889  #i[1] =    14124  #i[2] =      134   V = -250.000
+ c =        4  t =     3000  #e =    10136  #i[1] =    14350  #i[2] =      151   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        5  t =        0  #e =    10640  #i[1] =    14870  #i[2] =      167   V =  250.000
+ c =        5  t =     1000  #e =    10831  #i[1] =    15068  #i[2] =      189   V =    0.000
+ c =        5  t =     2000  #e =    11373  #i[1] =    15573  #i[2] =      210   V = -250.000
+ c =        5  t =     3000  #e =    11573  #i[1] =    15755  #i[2] =      235   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        6  t =        0  #e =    12036  #i[1] =    16245  #i[2] =      249   V =  250.000
+ c =        6  t =     1000  #e =    12208  #i[1] =    16408  #i[2] =      270   V =    0.000
+ c =        6  t =     2000  #e =    12684  #i[1] =    16870  #i[2] =      292   V = -250.000
+ c =        6  t =     3000  #e =    12843  #i[1] =    17013  #i[2] =      321   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        7  t =        0  #e =    13262  #i[1] =    17460  #i[2] =      346   V =  250.000
+ c =        7  t =     1000  #e =    13421  #i[1] =    17647  #i[2] =      362   V =    0.000
+ c =        7  t =     2000  #e =    13853  #i[1] =    18069  #i[2] =      383   V = -250.000
+ c =        7  t =     3000  #e =    14042  #i[1] =    18237  #i[2] =      408   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        8  t =        0  #e =    14423  #i[1] =    18635  #i[2] =      430   V =  250.000
+ c =        8  t =     1000  #e =    14530  #i[1] =    18771  #i[2] =      456   V =    0.000
+ c =        8  t =     2000  #e =    14935  #i[1] =    19167  #i[2] =      474   V = -250.000
+ c =        8  t =     3000  #e =    15122  #i[1] =    19320  #i[2] =      490   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        9  t =        0  #e =    15498  #i[1] =    19704  #i[2] =      510   V =  250.000
+ c =        9  t =     1000  #e =    15611  #i[1] =    19844  #i[2] =      528   V =    0.000
+ c =        9  t =     2000  #e =    15994  #i[1] =    20235  #i[2] =      544   V = -250.000
+ c =        9  t =     3000  #e =    16136  #i[1] =    20381  #i[2] =      562   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =       10  t =        0  #e =    16481  #i[1] =    20745  #i[2] =      579   V =  250.000
+ c =       10  t =     1000  #e =    16638  #i[1] =    20898  #i[2] =      597   V =    0.000
+ c =       10  t =     2000  #e =    17005  #i[1] =    21258  #i[2] =      628   V = -250.000
+ c =       10  t =     3000  #e =    17131  #i[1] =    21376  #i[2] =      654   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =       11  t =        0  #e =    17511  #i[1] =    21784  #i[2] =      675   V =  250.000
+ c =       11  t =     1000  #e =    17674  #i[1] =    21978  #i[2] =      689   V =    0.000
+ c =       11  t =     2000  #e =    18034  #i[1] =    22332  #i[2] =      710   V = -250.000
+ c =       11  t =     3000  #e =    18157  #i[1] =    22440  #i[2] =      729   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =       12  t =        0  #e =    18505  #i[1] =    22779  #i[2] =      740   V =  250.000
+ c =       12  t =     1000  #e =    18598  #i[1] =    22890  #i[2] =      749   V =    0.000
+ c =       12  t =     2000  #e =    18937  #i[1] =    23237  #i[2] =      767   V = -250.000
+ c =       12  t =     3000  #e =    19052  #i[1] =    23336  #i[2] =      796   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =       13  t =        0  #e =    19419  #i[1] =    23706  #i[2] =      825   V =  250.000
+ c =       13  t =     1000  #e =    19550  #i[1] =    23820  #i[2] =      838   V =    0.000
+ c =       13  t =     2000  #e =    19901  #i[1] =    24170  #i[2] =      853   V = -250.000
+ c =       13  t =     3000  #e =    20022  #i[1] =    24295  #i[2] =      866   V =   -0.000
+0 0 0
+0 0 0 0 0
+
+PICit! - 1d3v electrostatic PIC/MCC plasma simulation @ Wigner RCP
+>> PICit! starting...
+>> PICit! measurement mode: off
+>> PICit! Loading cross-sections for 3 species
+   Loading cross-sections from file ar_e_cs.bin
+     Cross-section name:  pre-processed cross section data
+     Interpolation type:  FUNCTION
+     Additional comments: ELE + AR complete set based on Phelps formulas
+     Energy resolution:   0.001 eV
+     Total data sets:     3
+     Data points per set: 1000000
+      0. > e + Ar -> e + Ar  isotropic elastic / type: 0 / target: Argon_gas / E_th: 0.000000e+00
+      1. > e + Ar -> e + Ar*  isotropic excitation / type: 0 / target: Argon_gas / E_th: 1.150000e+01
+      2. > e + Ar -> e + e + Ar+  ionization / type: 3 / target: Argon_gas / E_th: 1.580000e+01 / product(0): electron / product(1): Argon_ion
+     Selected for XT-analysis: none
+   Loading cross-sections from file ar_arp_fa_cs.bin
+     Cross-section name:  pre-processed cross section data
+     Interpolation type:  FUNCTION
+     Additional comments: AR+ + AR complete set based on Phelps formulas (1994 JAP paper)
+     Energy resolution:   1.000000e-03 eV
+     Total data sets:     2
+     Data points per set: 1000000
+      0. > Ar+ + Ar -> Ar+ + Ar  isotropic elastic FA / type: 11 / target: Argon_gas / E_th: 0.000000e+00
+      1. > Ar+ + Ar -> Ar+ + Ar  backward elastic FA / type: 12 / target: Argon_gas / E_th: 0.000000e+00
+     Selected for XT-analysis: none
+   Loading cross-sections from file arf_ar_cs.bin
+     Cross-section name:  pre-processed cross section data
+     Interpolation type:  LOG
+     Additional comments: Ar fast + AR complete set from TODO @ LxCat
+     Energy resolution:   1.000000e-03 eV
+     Total data sets:     1
+     Data points per set: 1000000
+      0. > Ar / type: 11 / target: Argon_gas / E_th: 0.000000e+00
+     Selected for XT-analysis: none
+>> PICit! interaction matrix (No. of cross-processes):
+     proj \ targ |     Argon_gas | 
+   --------------------------------
+        electron |             3 | 
+       Argon_ion |             2 | 
+   Argon_fast_atom |             1 | 
+   --------------------------------
+>> PICit! target densities loaded 
+      max densities:    2.41e+21 (Argon_gas)  
+      max coll probabilities: 
+          electron:     1.47e-02 
+         Argon_ion:     1.65e-02 
+      Argon_fast_atom:     7.11e-04 
+>> PICit: data loaded : 5151 electrons 8899 ions, 1 cycles completed before, time is 7.374631e-08 [s]
+>> PICit! data loaded : old_Q = 0.000000e+00, Q = 0.000000e+00, SIGMA = 0.000000e+00, QCONV = 0.000000e+00
+>> PICit! running 500 cycle(s)
+ c =        2  t =        0  #e =     5151  #i[1] =     8898  #i[2] =        4   V =  250.000
+ c =        2  t =     1000  #e =     5434  #i[1] =     9506  #i[2] =        9   V =    0.000
+ c =        2  t =     2000  #e =     6340  #i[1] =    10533  #i[2] =       14   V = -250.000
+ c =        2  t =     3000  #e =     6648  #i[1] =    10883  #i[2] =       23   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        3  t =        0  #e =     7344  #i[1] =    11628  #i[2] =       38   V =  250.000
+ c =        3  t =     1000  #e =     7656  #i[1] =    11971  #i[2] =       52   V =    0.000
+ c =        3  t =     2000  #e =     8301  #i[1] =    12592  #i[2] =       66   V = -250.000
+ c =        3  t =     3000  #e =     8572  #i[1] =    12850  #i[2] =       83   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        4  t =        0  #e =     9097  #i[1] =    13395  #i[2] =       95   V =  250.000
+ c =        4  t =     1000  #e =     9331  #i[1] =    13611  #i[2] =      108   V =    0.000
+ c =        4  t =     2000  #e =     9846  #i[1] =    14093  #i[2] =      128   V = -250.000
+ c =        4  t =     3000  #e =    10044  #i[1] =    14269  #i[2] =      145   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        5  t =        0  #e =    10578  #i[1] =    14792  #i[2] =      169   V =  250.000
+ c =        5  t =     1000  #e =    10786  #i[1] =    15007  #i[2] =      185   V =    0.000
+ c =        5  t =     2000  #e =    11264  #i[1] =    15451  #i[2] =      200   V = -250.000
+ c =        5  t =     3000  #e =    11470  #i[1] =    15623  #i[2] =      220   V =   -0.000
+0 0 0
+0 0 0 0 0
+ c =        6  t =        0  #e =    11889  #i[1] =    16069  #i[2] =      242   V =  250.000
+ c =        6  t =     1000  #e =    12034  #i[1] =    16236  #i[2] =      263   V =    0.000
+ c =        6  t =     2000  #e =    12512  #i[1] =    16708  #i[2] =      276   V = -250.000
+ c =        6  t =     3000  #e =    12677  #i[1] =    16864  #i[2] =      295   V =   -0.000
+0 0 0
+0 0 0 0 0

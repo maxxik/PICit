@@ -1,0 +1,12 @@
+--------------------------------------------------
+--- PICit! Cross Section Preprocessor log file ---
+--------------------------------------------------
+Input file         : cross_sections/fastAr_Ar_CS.txt
+Output file        : arf_ar_cs.bin
+Comments           : Ar fast + AR complete set from TODO @ LxCat
+Energy division    :  0.001
+Energy entries     : 1000000
+Interpolation      : LOG
+Reactions          : 
+0: >  Ar / type : 11 / target : 4 / value : 0.000000e+00
+--------------------------------------------------
