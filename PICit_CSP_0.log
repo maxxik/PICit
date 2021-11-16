@@ -8,7 +8,13 @@ Energy division    :  0.001
 Energy entries     : 1000000
 Interpolation      : FUNCTION
 Reactions          : 
+<<<<<<< HEAD
 0: >  e + Ar -> e + Ar  isotropic elastic / type : 0 / target : 4 / value : 0.000000e+00
 1: >  e + Ar -> e + Ar*  isotropic excitation / type : 0 / target : 4 / value : 1.150000e+01
 2: >  e + Ar -> e + e + Ar+  ionization / type : 3 / target : 4 / value : 1.580000e+01
+=======
+0: >  e + Ar -> e + Ar  isotropic elastic / type : 0 / target : 4 / value : 0.000000e+000
+1: >  e + Ar -> e + Ar*  isotropic excitation / type : 0 / target : 4 / value : 1.150000e+001
+2: >  e + Ar -> e + e + Ar+  ionization / type : 3 / target : 4 / value : 1.580000e+001
+>>>>>>> f928462d371052bcaaaa635219f45a334570ba0d
 --------------------------------------------------
