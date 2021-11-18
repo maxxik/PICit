@@ -1,0 +1,99 @@
+
+PICit! - 1d3v electrostatic PIC/MCC plasma simulation @ Wigner RCP
+>> PICit! starting...
+>> PICit! measurement mode: off
+>> PICit! Loading cross-sections for 3 species
+   Loading cross-sections from file ar_e_cs.bin
+     Cross-section name:  pre-processed cross section data
+     Interpolation type:  FUNCTION
+     Additional comments: ELE + AR complete set based on Phelps formulas
+     Energy resolution:   0.001 eV
+     Total data sets:     3
+     Data points per set: 1000000
+      0. > e + Ar -> e + Ar  isotropic elastic / type: 0 / target: Argon_gas / E_th: 0.000000e+00
+      1. > e + Ar -> e + Ar*  isotropic excitation / type: 0 / target: Argon_gas / E_th: 1.150000e+01
+      2. > e + Ar -> e + e + Ar+  ionization / type: 3 / target: Argon_gas / E_th: 1.580000e+01 / product(0): electron / product(1): Argon_ion
+     Selected for XT-analysis: none
+   Loading cross-sections from file ar_arp_fa_cs.bin
+     Cross-section name:  pre-processed cross section data
+     Interpolation type:  FUNCTION
+     Additional comments: AR+ + AR complete set based on Phelps formulas (1994 JAP paper)
+     Energy resolution:   1.000000e-03 eV
+     Total data sets:     2
+     Data points per set: 1000000
+      0. > Ar+ + Ar -> Ar+ + Ar  isotropic elastic FA / type: 11 / target: Argon_gas / E_th: 0.000000e+00
+      1. > Ar+ + Ar -> Ar+ + Ar  backward elastic FA / type: 12 / target: Argon_gas / E_th: 0.000000e+00
+     Selected for XT-analysis: none
+   Loading cross-sections from file arf_ar_cs.bin
+     Cross-section name:  pre-processed cross section data
+     Interpolation type:  LOG
+     Additional comments: Ar fast + AR complete set from TODO @ LxCat
+     Energy resolution:   1.000000e-03 eV
+     Total data sets:     1
+     Data points per set: 1000000
+      0. > Ar / type: 11 / target: Argon_gas / E_th: 0.000000e+00
+     Selected for XT-analysis: none
+>> PICit! interaction matrix (No. of cross-processes):
+     proj \ targ |     Argon_gas | 
+   --------------------------------
+        electron |             3 | 
+       Argon_ion |             2 | 
+   Argon_fast_atom |             1 | 
+   --------------------------------
+>> PICit! target densities loaded 
+      max densities:    2.41e+21 (Argon_gas)  
+      max coll probabilities: 
+          electron:     1.47e-02 
+         Argon_ion:     1.65e-02 
+      Argon_fast_atom:     5.84e-04 
+>> PICit: data loaded : 27264 electrons 31794 ions, 21 cycles completed before, time is 1.548673e-06 [s]
+>> PICit! data loaded : old_Q = 0.000000e+00, Q = 0.000000e+00, SIGMA = 0.000000e+00, QCONV = 0.000000e+00
+>> PICit! running 1000 cycle(s)
+ c =       22  t =        0  #e =    27264  #i[1] =    31792  #i[2] =     2206   V =  250.000
+ c =       22  t =     1000  #e =    27376  #i[1] =    31906  #i[2] =     2244   V =    0.000
+ c =       22  t =     2000  #e =    27662  #i[1] =    32210  #i[2] =     2290   V = -250.000
+ c =       22  t =     3000  #e =    27763  #i[1] =    32305  #i[2] =     2336   V =   -0.000
+106 84 26
+106 84 28 3427 26
+ c =       23  t =        0  #e =    28066  #i[1] =    32616  #i[2] =     2370   V =  250.000
+ c =       23  t =     1000  #e =    28149  #i[1] =    32689  #i[2] =     2409   V =    0.000
+ c =       23  t =     2000  #e =    28441  #i[1] =    33012  #i[2] =     2442   V = -250.000
+ c =       23  t =     3000  #e =    28518  #i[1] =    33094  #i[2] =     2493   V =   -0.000
+199 182 52
+199 182 56 7024 52
+ c =       24  t =        0  #e =    28809  #i[1] =    33388  #i[2] =     2535   V =  250.000
+ c =       24  t =     1000  #e =    28897  #i[1] =    33474  #i[2] =     2577   V =    0.000
+ c =       24  t =     2000  #e =    29207  #i[1] =    33800  #i[2] =     2614   V = -250.000
+ c =       24  t =     3000  #e =    29314  #i[1] =    33901  #i[2] =     2654   V =   -0.000
+308 261 84
+308 261 87 10595 84
+ c =       25  t =        0  #e =    29586  #i[1] =    34190  #i[2] =     2690   V =  250.000
+ c =       25  t =     1000  #e =    29679  #i[1] =    34284  #i[2] =     2731   V =    0.000
+ c =       25  t =     2000  #e =    29976  #i[1] =    34571  #i[2] =     2773   V = -250.000
+ c =       25  t =     3000  #e =    30096  #i[1] =    34663  #i[2] =     2810   V =   -0.000
+420 342 116
+420 342 119 14339 116
+ c =       26  t =        0  #e =    30348  #i[1] =    34929  #i[2] =     2852   V =  250.000
+ c =       26  t =     1000  #e =    30421  #i[1] =    35007  #i[2] =     2898   V =    0.000
+ c =       26  t =     2000  #e =    30682  #i[1] =    35290  #i[2] =     2938   V = -250.000
+ c =       26  t =     3000  #e =    30789  #i[1] =    35400  #i[2] =     2989   V =   -0.000
+542 441 153
+542 441 163 18207 153
+ c =       27  t =        0  #e =    31066  #i[1] =    35720  #i[2] =     3034   V =  250.000
+ c =       27  t =     1000  #e =    31179  #i[1] =    35823  #i[2] =     3076   V =    0.000
+ c =       27  t =     2000  #e =    31485  #i[1] =    36128  #i[2] =     3127   V = -250.000
+ c =       27  t =     3000  #e =    31612  #i[1] =    36224  #i[2] =     3176   V =   -0.000
+653 551 194
+653 551 215 22201 194
+ c =       28  t =        0  #e =    31869  #i[1] =    36502  #i[2] =     3216   V =  250.000
+ c =       28  t =     1000  #e =    31965  #i[1] =    36610  #i[2] =     3265   V =    0.000
+ c =       28  t =     2000  #e =    32242  #i[1] =    36904  #i[2] =     3305   V = -250.000
+ c =       28  t =     3000  #e =    32319  #i[1] =    36972  #i[2] =     3351   V =   -0.000
+747 670 228
+747 670 259 26206 228
+ c =       29  t =        0  #e =    32580  #i[1] =    37246  #i[2] =     3396   V =  250.000
+ c =       29  t =     1000  #e =    32644  #i[1] =    37309  #i[2] =     3438   V =    0.000
+ c =       29  t =     2000  #e =    32918  #i[1] =    37605  #i[2] =     3490   V = -250.000
+ c =       29  t =     3000  #e =    32999  #i[1] =    37681  #i[2] =     3545   V =   -0.000
+865 802 280
+865 802 298 30194 280

@@ -7,13 +7,13 @@ Frequency                             = 1.356000e+07 [Hz]
 # of electron / ion time steps        =           20
 Voltage amplitude                     = 2.500000e+02 [V]
 Pressure                              = 1.000000e+01 [Pa]
-Mean temperature                      = 2.941356e+02 [K]
+Mean temperature                      = 3.001346e+02 [K]
 perpendicular B-field                 = 0.000000e+00 [T]
 initial target gas composition [ 0]   =       100.00 % (Argon_gas)
 Superparticle weight for species  0   = 7.000000e+04 (electron)
 Superparticle weight for species  1   = 7.000000e+04 (Argon_ion)
 Superparticle weight for species  2   = 2.100000e+06 (Argon_fast_atom)
-# of simulation cycles in this run    =           20
+# of simulation cycles in this run    =            1
 --------------------------------------------------------------------------------
 Electron reflection coefficients      = 0.70, 0.70
 Electron emission coefficients [ 0]   = 0.00, 0.00 (for electron impact) 
@@ -23,53 +23,53 @@ Cross-section name for species  0     = ELE + AR complete set based on Phelps fo
 Cross-section name for species  1     = AR+ + AR complete set based on Phelps formulas (1994 JAP paper)
 Cross-section name for species  2     = Ar fast + AR complete set from TODO @ LxCat
 --------------------------------------------------------------------------------
-Electron density @ center             = 4.862095e+15 [m^{-3}]
-Plasma frequency @ center             = 3.933718e+09 [rad/s]
-Debye length @ center                 = 1.425939e-04 [m]
-electron     collision frequency      = 1.211426e+08 [1/s]
-Argon_ion    collision frequency      = 2.166418e+06 [1/s]
-Argon_fast_atom collision frequency      = 8.818826e+05 [1/s]
-Plasma frequency @ center * DT_E      =       0.0725 (OK if less than 0.20)
-DX / Debye length @ center            =       0.3431 (OK if less than 1.00)
+Electron density @ center             = 2.585444e+15 [m^{-3}]
+Plasma frequency @ center             = 2.868528e+09 [rad/s]
+Debye length @ center                 = 2.270031e-04 [m]
+electron     collision frequency      = 1.823200e+08 [1/s]
+Argon_ion    collision frequency      = 2.528136e+06 [1/s]
+Argon_fast_atom collision frequency      = 6.649112e+05 [1/s]
+Plasma frequency @ center * DT_E      =       0.0529 (OK if less than 0.20)
+DX / Debye length @ center            =       0.2155 (OK if less than 1.00)
 Electron cyclotron frequency * DT_E   =       0.0000 (OK if less than 0.20)
 Max. electron     coll. probabability =       0.0147 (OK if less than 0.05)
 Max. Argon_ion    coll. probabability =       0.0165 (OK if less than 0.05)
-Max. Argon_fast_atom coll. probabability =       0.0007 (OK if less than 0.05)
+Max. Argon_fast_atom coll. probabability =       0.0006 (OK if less than 0.05)
 Max e- energy for CFL condition       =      20.0183 [eV]
 --------------------------------------------------------------------------------
 Max. target densities:  0             = 2.414324e+21 [m^{-3}]  (Argon_gas)
 --------------------------------------------------------------------------------
-electron     flux at powered electr.  = 9.027841e+18 [m^{-2} s^{-1}]
-electron     flux at grounded electr. = 8.071522e+18 [m^{-2} s^{-1}]
-Mean electron     energy at pow. ele. = 4.913331e+00 [eV]
-Mean electron     energy at grounded  = 5.053601e+00 [eV]
-Argon_ion    flux at powered electr.  = 2.361610e+18 [m^{-2} s^{-1}]
-Argon_ion    flux at grounded electr. = 2.400052e+18 [m^{-2} s^{-1}]
-Mean Argon_ion    energy at pow. ele. = 2.938766e+01 [eV]
-Mean Argon_ion    energy at grounded  = 2.885159e+01 [eV]
-Argon_fast_atom flux at powered electr.  = 1.375391e+19 [m^{-2} s^{-1}]
-Argon_fast_atom flux at grounded electr. = 1.469362e+19 [m^{-2} s^{-1}]
+electron     flux at powered electr.  = 6.198276e+18 [m^{-2} s^{-1}]
+electron     flux at grounded electr. = 6.207768e+18 [m^{-2} s^{-1}]
+Mean electron     energy at pow. ele. = 5.322358e+00 [eV]
+Mean electron     energy at grounded  = 5.075804e+00 [eV]
+Argon_ion    flux at powered electr.  = 1.812972e+18 [m^{-2} s^{-1}]
+Argon_ion    flux at grounded electr. = 1.594656e+18 [m^{-2} s^{-1}]
+Mean Argon_ion    energy at pow. ele. = 2.784031e+01 [eV]
+Mean Argon_ion    energy at grounded  = 2.755357e+01 [eV]
+Argon_fast_atom flux at powered electr.  = 1.110564e+19 [m^{-2} s^{-1}]
+Argon_fast_atom flux at grounded electr. = 1.452276e+19 [m^{-2} s^{-1}]
 Mean Argon_fast_atom energy at pow. ele. = 5.000000e-01 [eV]
 Mean Argon_fast_atom energy at grounded  = 5.000000e-01 [eV]
 --------------------------------------------------------------------------------
-Flux of reflected electrons from powered electrode  = 6.330215e+18 [m^{-2} s^{-1}]
-Flux of reflected electrons from grounded electrode = 5.632078e+18 [m^{-2} s^{-1}]
+Flux of reflected electrons from powered electrode  = 4.261908e+18 [m^{-2} s^{-1}]
+Flux of reflected electrons from grounded electrode = 4.318860e+18 [m^{-2} s^{-1}]
 Flux of electrons emitted by species  0 from powered electrode  = 0.000000e+00 [m^{-2} s^{-1}]
 Flux of electrons emitted by species  0 from grounded electrode = 0.000000e+00 [m^{-2} s^{-1}]
-Flux of electrons emitted by species  1 from powered electrode  = 1.708560e+17 [m^{-2} s^{-1}]
-Flux of electrons emitted by species  1 from grounded electrode = 1.680084e+17 [m^{-2} s^{-1}]
+Flux of electrons emitted by species  1 from powered electrode  = 1.328880e+17 [m^{-2} s^{-1}]
+Flux of electrons emitted by species  1 from grounded electrode = 7.593600e+16 [m^{-2} s^{-1}]
 Flux of electrons emitted by species  2 from powered electrode  = 0.000000e+00 [m^{-2} s^{-1}]
 Flux of electrons emitted by species  2 from grounded electrode = 0.000000e+00 [m^{-2} s^{-1}]
 --------------------------------------------------------------------------------
 Collision rate XT files (total 0):
 --------------------------------------------------------------------------------
 Event numbers for electron  (ar_e_cs.bin)
-     1. =  14577913  (e + Ar -> e + Ar  isotropic elastic)
-     2. =  44285  (e + Ar -> e + Ar*  isotropic excitation)
-     3. =  17114  (e + Ar -> e + e + Ar+  ionization)
+     1. =  517258  (e + Ar -> e + Ar  isotropic elastic)
+     2. =  2411  (e + Ar -> e + Ar*  isotropic excitation)
+     3. =  1059  (e + Ar -> e + e + Ar+  ionization)
 Event numbers for Argon_ion  (ar_arp_fa_cs.bin)
-     1. =  139561  (Ar+ + Ar -> Ar+ + Ar  isotropic elastic FA)
-     2. =  139549  (Ar+ + Ar -> Ar+ + Ar  backward elastic FA)
+     1. =  3728  (Ar+ + Ar -> Ar+ + Ar  isotropic elastic FA)
+     2. =  4390  (Ar+ + Ar -> Ar+ + Ar  backward elastic FA)
 Event numbers for Argon_fast_atom  (arf_ar_cs.bin)
-     1. =  8041  (Ar)
+     1. =  254  (Ar)
 --------------------------------------------------------------------------------

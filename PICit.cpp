@@ -570,13 +570,13 @@ void isotropic_scattering_fa(const int species_index, const double E_threshold, 
     double energy_2_t = 0.5 *  MASS(AR_FAST) * (vx_2_t * vx_2_t + vy_2_t * vy_2_t + vz_2_t * vz_2_t);
 
 
-    if (R01(MTgen) < WEIGHT_FACTORS[AR_ION]/WEIGHT_FACTORS[AR_FAST]){ // TODO AR SPECIFIC
-        //cout << "Target " << energy_2_t*J_TO_EV << endl;
+    double rmodr{}, rmodl{};
+    size_t p{};
+    //cout << "Target " << energy_2_t*J_TO_EV << endl;
 
-        double rmodr{}, rmodl{};
-        size_t p{};
-
-        if(energy_2_t > FA_E_THRESHOLD){ // add new fast atom and remove its energy from P field
+    if(energy_2_t > FA_E_THRESHOLD){ // add new fast atom and remove its energy from P field
+        bool toGenerate = (species_index == AR_FAST) ? true : R01(MTgen) < WEIGHT_FACTORS[species_index]/WEIGHT_FACTORS[AR_FAST];
+        if (toGenerate){ // TODO AR SPECIFIC
             x[AR_FAST].push_back( xe );
             vx[AR_FAST].push_back( vx_2_t ); 
             vy[AR_FAST].push_back( vy_2_t );
@@ -586,29 +586,28 @@ void isotropic_scattering_fa(const int species_index, const double E_threshold, 
             p      = static_cast<size_t>(rmodr);
             rmodr  -= floor(rmodr);                  // right-side remainder
             rmodl  = 1.0 - rmodr;                    // left-side remainder
-            double dp = energy_2_t/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
+            double dp = energy_1_t/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
             //cout << "- " << dp << endl;
             pfield.at(p)   -= rmodl * dp;
             pfield.at(p+1) -= rmodr * dp;
 
             if (species_index == AR_FAST) {FA_ADDED_FA++; ENERGY_REMOVED_FA++;}
             else if (species_index == AR_ION) {FA_ADDED_ION++; ENERGY_REMOVED_ION++;}
-            
-        }
-        else if((energy_2_t-energy_1_t)>0){ // atom not fast enough, add its extra energy to P field
+        }     
+    }
+    else{ // atom not fast enough, add its extra energy to P field
 
-            rmodr  = xe * INV_DX;
-            p      = static_cast<size_t>(rmodr);
-            rmodr  -= floor(rmodr);                // right-side remainder
-            rmodl  = 1.0 - rmodr;                  // left-side remainder
-            double dp = (energy_2_t-energy_1_t)/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
-            //cout << "+ " << dp << endl;
-            pfield.at(p)   += rmodl * dp;
-            pfield.at(p+1) += rmodr * dp;
-            
-            if (species_index == AR_FAST) ENERGY_ADDED_FA++;
-            else if (species_index == AR_ION) ENERGY_ADDED_ION++;
-        }
+        rmodr  = xe * INV_DX;
+        p      = static_cast<size_t>(rmodr);
+        rmodr  -= floor(rmodr);                // right-side remainder
+        rmodl  = 1.0 - rmodr;                  // left-side remainder
+        double dp = (energy_2_t-energy_1_t)/(ELECTRODE_AREA*DX)*WEIGHT(species_index);
+        //cout << "+ " << dp << endl;
+        pfield.at(p)   += rmodl * dp;
+        pfield.at(p+1) += rmodr * dp;
+        
+        if (species_index == AR_FAST) ENERGY_ADDED_FA++;
+        else if (species_index == AR_ION) ENERGY_ADDED_ION++;
     }
 }
 
@@ -633,13 +632,14 @@ void backward_scattering_fa(const int species_index, const double E_threshold, d
 
     double energy_2_t = 0.5 *  MASS(AR_FAST) * (vx_2_t * vx_2_t + vy_2_t * vy_2_t + vz_2_t * vz_2_t);     // TODO
 
-    
-    if (R01(MTgen) < WEIGHT_FACTORS[AR_ION]/WEIGHT_FACTORS[AR_FAST]){ // TODO AR SPECIFIC
-        double rmodr{}, rmodl{};
-        size_t p{};
-        //cout << "Target " << energy_2_t*J_TO_EV << endl;
+    double rmodr{}, rmodl{};
+    size_t p{};
+    //cout << "Target " << energy_2_t*J_TO_EV << endl;
+    //cout << "back weight_proj" << weight_proj << endl;
 
-        if(energy_2_t > FA_E_THRESHOLD){ // add new fast atom and remove its energy from P field
+    if(energy_2_t > FA_E_THRESHOLD){ // add new fast atom and remove its energy from P field
+        bool toGenerate = (species_index == AR_FAST) ? true : R01(MTgen) < WEIGHT_FACTORS[species_index]/WEIGHT_FACTORS[AR_FAST];
+        if (toGenerate){ // TODO AR SPECIFIC
             x[AR_FAST].push_back( xe );
             vx[AR_FAST].push_back( vx_2_t ); 
             vy[AR_FAST].push_back( vy_2_t );
@@ -649,29 +649,28 @@ void backward_scattering_fa(const int species_index, const double E_threshold, d
             p      = static_cast<size_t>(rmodr);
             rmodr  -= floor(rmodr);                  // right-side remainder
             rmodl  = 1.0 - rmodr;                    // left-side remainder
-            double dp = energy_2_t/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
+            double dp = energy_1_t/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
             //cout << "- " << dp << endl;
             pfield.at(p)   -= rmodl * dp;
             pfield.at(p+1) -= rmodr * dp;
 
             if (species_index == AR_FAST) {FA_ADDED_FA++; ENERGY_REMOVED_FA++;}
             else if (species_index == AR_ION) {FA_ADDED_ION++; ENERGY_REMOVED_ION++;}
-            
-        }
-        else if ((energy_2_t-energy_1_t)>0){ // atom not fast enough, add its extra energy to P field
+        }     
+    }
+    else{ // atom not fast enough, add its extra energy to P field
 
-            rmodr  = xe * INV_DX;
-            p      = static_cast<size_t>(rmodr);
-            rmodr  -= floor(rmodr);                // right-side remainder
-            rmodl  = 1.0 - rmodr;                  // left-side remainder
-            double dp = (energy_2_t-energy_1_t)/(ELECTRODE_AREA*DX)*WEIGHT(AR_FAST);
-            //cout << "+ " << dp << endl;
-            pfield.at(p)   += rmodl * dp;
-            pfield.at(p+1) += rmodr * dp;
-            
-            if (species_index == AR_FAST) ENERGY_ADDED_FA++;
-            else if (species_index == AR_ION) ENERGY_ADDED_ION++;
-        }
+        rmodr  = xe * INV_DX;
+        p      = static_cast<size_t>(rmodr);
+        rmodr  -= floor(rmodr);                // right-side remainder
+        rmodl  = 1.0 - rmodr;                  // left-side remainder
+        double dp = (energy_2_t-energy_1_t)/(ELECTRODE_AREA*DX)*WEIGHT(species_index);
+        //cout << "+ " << dp << endl;
+        pfield.at(p)   += rmodl * dp;
+        pfield.at(p+1) += rmodr * dp;
+        
+        if (species_index == AR_FAST) ENERGY_ADDED_FA++;
+        else if (species_index == AR_ION) ENERGY_ADDED_ION++;
     }
 }
 

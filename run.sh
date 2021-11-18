@@ -1,2 +1,2 @@
-./PICit 100
-./PICit 20 m
+./PICit 1000
+./PICit 100 m

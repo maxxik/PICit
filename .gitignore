@@ -2,3 +2,5 @@ plasma.szfki.hu/
 logs/
 .ipynb_checkpoints/
 prevoius_runs/
+outputs/
+*.dat
