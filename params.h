@@ -12,7 +12,7 @@ constexpr int         N_G             = 512;                        // number of
 constexpr int         N_T             = 4000;                       // time steps within an RF period
 constexpr double      FREQUENCY       = 13.56e6;                     // driving frequency [Hz]
 constexpr double      VOLTAGE         = 250.0;                      // voltage amplitude [V]
-constexpr double      L               = 0.025;                      // electrode gap [m]
+constexpr double      L               = 0.04;                      // electrode gap [m]
 constexpr double      PRESSURE        = 10.0;                       // gas pressure [Pa]
 constexpr double      T_WALL          = 300.0;                      // wall temperature
 constexpr double      WEIGHT_COM      = 7.0e4;                      // common weight of superparticles (see weight factors)
@@ -48,7 +48,7 @@ constexpr bool        COULOMB_COLL    = false;                        // Coulomb
 constexpr int         N_SPECIES                 = 3;                              // number of species in the simulation
 constexpr int         SPECIES_KIND[N_SPECIES]   = { ELE, AR_ION, AR_FAST };
 constexpr double      DT[N_SPECIES]             = { DT_E, DT_I, DT_I};          // time steps
-constexpr double      WEIGHT_FACTORS[N_SPECIES] = { 1.0, 1.0, 30.0};            // superparticle weight factors
+constexpr double      WEIGHT_FACTORS[N_SPECIES] = { 1.0, 1.0, 20.0};            // superparticle weight factors
 constexpr string_view CS_FILES[N_SPECIES]       = { "ar_e_cs.bin",              // cs files to use (one for each species)
                                                     "ar_arp_fa_cs.bin",
                                                     "arf_ar_cs.bin"};     
@@ -73,9 +73,11 @@ constexpr int         SAVE_XT_TOT                    = SUM_ARRAY(SAVE_XT_NUM);  
 // surface coefficients
 constexpr int         N_SIDES              = 2;                     // No. of surfaces: 0 = powered/left, 1 = grounded/right
 constexpr double      SURF_NORMAL[N_SIDES] = {1.0, -1.0};           // surface normal vector directions
-constexpr double      SURF_R_ELE[N_SIDES]  = {0.7, 0.7};            // elastic electron reflection coefficients on two sides
+//constexpr double      SURF_R_ELE[N_SIDES]  = {0.7, 0.7};            // elastic electron reflection coefficients on two sides
+constexpr double      SURF_R_ELE[N_SIDES]  = {0.0, 0.0};            // elastic electron reflection coefficients on two sides
 constexpr double      SURF_E_EMISSION[N_SPECIES][N_SIDES] = { {0.0, 0.0},    // secondary electron emission yields
-                                                              {0.07, 0.07},
+//                                                              {0.07, 0.07},
+                                                              {0.0, 0.0},
                                                               {0.0, 0.0} };
 constexpr double      ALPHA                 = 0.5;                  // Accomodation coefficient @@@ 
 
