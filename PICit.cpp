@@ -498,12 +498,20 @@ void ionization_Opal(const int species_index, const int product_index, const dou
     vz[ELE].push_back( wz + F2 * gz );
 
     double ratio = WEIGHT_FACTORS[species_index]/WEIGHT_FACTORS[product_index]; // determine how many ions need to be produced
+
+    double rmodr{}, rmodl{};
+    size_t p{};
+    rmodr  = xe * INV_DX;
+    p      = static_cast<size_t>(rmodr);
+    rmodr  -= floor(rmodr);                // right-side remainder
+    rmodl  = 1.0-rmodr;                    // left-side remainder
     double r = R01(MTgen);
+    double temperature = temp.at(p)*rmodl+temp.at(p+1)*rmodr;
     while(r < ratio){
-        x[product_index].push_back( xe );                                       // add new ion
-        vx[product_index].push_back( RNDveloc(MASS(product_index)) );           // velocity is sampled from background thermal distribution
-        vy[product_index].push_back( RNDveloc(MASS(product_index)) ); 
-        vz[product_index].push_back( RNDveloc(MASS(product_index)) ); 
+        x[product_index].push_back( xe );                                                    // add new ion
+        vx[product_index].push_back( RNDveloc(MASS(product_index), temperature) );           // velocity is sampled from background thermal distribution
+        vy[product_index].push_back( RNDveloc(MASS(product_index), temperature) ); 
+        vz[product_index].push_back( RNDveloc(MASS(product_index), temperature) ); 
         --ratio;
     }
 }
@@ -534,11 +542,19 @@ void ionization_equalshare(const int species_index, const int product_index, con
 
     double ratio = WEIGHT_FACTORS[species_index]/WEIGHT_FACTORS[product_index]; // determine how many ions need to be produced
     double r = R01(MTgen);                                  // determine how many ions need to be produced
+    
+    double rmodr{}, rmodl{};
+    size_t p{};
+    rmodr  = xe * INV_DX;
+    p      = static_cast<size_t>(rmodr);
+    rmodr  -= floor(rmodr);                // right-side remainder
+    rmodl  = 1.0-rmodr;                    // left-side remainder
+    double temperature = temp.at(p)*rmodl+temp.at(p+1)*rmodr;
     while(r < ratio){
         x[product_index].push_back( xe );                    // add new ion
-        vx[product_index].push_back( RNDveloc(MASS(product_index)) );           // velocity is sampled from background thermal distribution
-        vy[product_index].push_back( RNDveloc(MASS(product_index)) ); 
-        vz[product_index].push_back( RNDveloc(MASS(product_index)) ); 
+        vx[product_index].push_back( RNDveloc(MASS(product_index), temperature) );           // velocity is sampled from background thermal distribution
+        vy[product_index].push_back( RNDveloc(MASS(product_index), temperature) ); 
+        vz[product_index].push_back( RNDveloc(MASS(product_index), temperature) ); 
         --ratio;
     }
 }
@@ -591,8 +607,8 @@ void isotropic_scattering_fa(const int species_index, const double E_threshold, 
             pfield.at(p)   -= rmodl * dp;
             pfield.at(p+1) -= rmodr * dp;
 
-            if (species_index == AR_FAST) {FA_ADDED_FA++; ENERGY_REMOVED_FA++;}
-            else if (species_index == AR_ION) {FA_ADDED_ION++; ENERGY_REMOVED_ION++;}
+            //if (species_index == AR_FAST) {FA_ADDED_FA++; ENERGY_REMOVED_FA++;}
+            //else if (species_index == AR_ION) {FA_ADDED_ION++; ENERGY_REMOVED_ION++;}
         }     
     }
     else{ // atom not fast enough, add its extra energy to P field
@@ -606,8 +622,8 @@ void isotropic_scattering_fa(const int species_index, const double E_threshold, 
         pfield.at(p)   += rmodl * dp;
         pfield.at(p+1) += rmodr * dp;
         
-        if (species_index == AR_FAST) ENERGY_ADDED_FA++;
-        else if (species_index == AR_ION) ENERGY_ADDED_ION++;
+        //if (species_index == AR_FAST) ENERGY_ADDED_FA++;
+        //else if (species_index == AR_ION) ENERGY_ADDED_ION++;
     }
 }
 
@@ -654,8 +670,8 @@ void backward_scattering_fa(const int species_index, const double E_threshold, d
             pfield.at(p)   -= rmodl * dp;
             pfield.at(p+1) -= rmodr * dp;
 
-            if (species_index == AR_FAST) {FA_ADDED_FA++; ENERGY_REMOVED_FA++;}
-            else if (species_index == AR_ION) {FA_ADDED_ION++; ENERGY_REMOVED_ION++;}
+            //if (species_index == AR_FAST) {FA_ADDED_FA++; ENERGY_REMOVED_FA++;}
+            //else if (species_index == AR_ION) {FA_ADDED_ION++; ENERGY_REMOVED_ION++;}
         }     
     }
     else{ // atom not fast enough, add its extra energy to P field
@@ -669,8 +685,8 @@ void backward_scattering_fa(const int species_index, const double E_threshold, d
         pfield.at(p)   += rmodl * dp;
         pfield.at(p+1) += rmodr * dp;
         
-        if (species_index == AR_FAST) ENERGY_ADDED_FA++;
-        else if (species_index == AR_ION) ENERGY_ADDED_ION++;
+        //if (species_index == AR_FAST) ENERGY_ADDED_FA++;
+        //else if (species_index == AR_ION) ENERGY_ADDED_ION++;
     }
 }
 
@@ -795,12 +811,20 @@ void diss_attachment(const int species_index, const int product_index, const int
 
     //create product with given probability
     double ratio = WEIGHT_FACTORS[species_index]/WEIGHT_FACTORS[product_index];  // determine how many targets need to vanish
-    double r = R01(MTgen);      
+    double r = R01(MTgen);
+
+    double rmodr{}, rmodl{};
+    size_t p{};
+    rmodr  = xe * INV_DX;
+    p      = static_cast<size_t>(rmodr);
+    rmodr  -= floor(rmodr);                // right-side remainder
+    rmodl  = 1.0-rmodr;                    // left-side remainder
+    double temperature = temp.at(p)*rmodl+temp.at(p+1)*rmodr;
     while(r<ratio){
         x[product_index].push_back( xe );                    // add new ion
-        vx[product_index].push_back( RNDveloc(MASS(product_index)) );           // velocity is sampled from background thermal distribution
-        vy[product_index].push_back( RNDveloc(MASS(product_index)) ); 
-        vz[product_index].push_back( RNDveloc(MASS(product_index)) ); 
+        vx[product_index].push_back( RNDveloc(MASS(product_index), temperature) );           // velocity is sampled from background thermal distribution
+        vy[product_index].push_back( RNDveloc(MASS(product_index), temperature) ); 
+        vz[product_index].push_back( RNDveloc(MASS(product_index), temperature) ); 
         --ratio;
     }
 
@@ -963,8 +987,8 @@ void do_collision(const int species_index, const size_t part_index, int *e_index
                 pfield.at(p)   += rmodl * dp;
                 pfield.at(p+1) += rmodr * dp;
 
-                ENERGY_ADDED_FA_REM++;
-                FA_REMOVED++;
+                //ENERGY_ADDED_FA_REM++;
+                //FA_REMOVED++;
             }
         }
     }
@@ -1084,21 +1108,6 @@ void solve_heat (xvector pfield1, double tt, double Tg_0, double Tg_L, int iter)
         printf("Final temp %f %f\n", temp.front(), temp.back());
     }
     
-}
-
-void temp_calc()
-{
-    solve_heat(pfield, ((double)no_of_cycles)*PERIOD, temp.front(), temp.back(), 0);
-
-    for (int t{0}; t<N_TARGET; t++){
-        if (t == AR_GAS){
-                // calculate gas density from gas temperature
-                for (int k=0; k<N_G; k++){
-                    target_density[AR_GAS].at(k) = PRESSURE / (K_BOLTZMANN * temp.at(k));
-                }
-            }
-    }
-    cout << ">> PICit: solving heat equation..." << endl;
 }
 
 void mean_temp_calc(){
@@ -1378,9 +1387,6 @@ void check_boundary_constant(int species){     // variant using constant R_ele, 
 //---------------------------------------------------------------------//
 
 void do_measurement(const int species, int t){
-    
-    if (DEBUG_MODE) cout << ">> 5.1" <<endl;
-
     size_t t_index = t/N_BIN;
     // first do the common part -- only for species == ELE
     if(species==ELE){
@@ -1406,7 +1412,6 @@ void do_measurement(const int species, int t){
         rmodl  = 1.0-rmodr;                    // left-side remainder
         e_x    = rmodl * efield.at(p) + rmodr * efield.at(p+1);
         mean_v = vx[species].at(k) - 0.5*e_x*FACTOR_P(species);
-        if (DEBUG_MODE) cout << ">> 5.2" <<endl;
         // calculate current density -- mean velocity can be calculated from j(x,t)!
         j_xt[species].at(t_index*N_G+p)   += rmodl*mean_v;
         j_xt[species].at(t_index*N_G+p+1) += rmodr*mean_v;
@@ -1421,14 +1426,12 @@ void do_measurement(const int species, int t){
         energy = 0.5*MASS(species)*v2*J_TO_EV;
         
 
-        if (DEBUG_MODE) cout << ">> 5.3" <<endl;
         // mean energy -- XT
         meane_xt[species].at(t_index*N_G+p)   += rmodl*energy;
         meane_xt[species].at(t_index*N_G+p+1) += rmodr*energy;
         
         // calculate momentum loss, Pi_C_xt 
         energy_index = min(static_cast<int>(energy / DE_CS + 0.5), CS_RANGES-1);
-        if (DEBUG_MODE) cout << ">> 5.31 " << energy*J_TO_EV <<endl;
         velocity     = sqrt(v2);
         rate         = 0.0;
         ratep        = 0.0;
@@ -1437,7 +1440,6 @@ void do_measurement(const int species, int t){
             ratep += static_cast<double>(sigma_tot[species][t].at(energy_index))*target_density[t].at(p+1);
         } 
         rate        *= mean_v*velocity;
-        if (DEBUG_MODE) cout << ">> 5.32" <<endl;
         ratep        *= mean_v*velocity;
         Pi_C_xt[species].at(t_index*N_G+p)   -= rmodl*rate;
         Pi_C_xt[species].at(t_index*N_G+p+1) -= rmodr*ratep;
@@ -1462,7 +1464,6 @@ void do_measurement(const int species, int t){
                 N_center_mean_energy++;
             }
         }
-        if (DEBUG_MODE) cout << ">> 5.4" <<endl;
     }
 }
 
@@ -1614,7 +1615,6 @@ void do_one_cycle (void){
     for (int t{0}; t<N_T; t++){                                  // the RF period is divided into N_T equal time intervals (time step DT_E)
         Time += DT_E;                                           // update of the total simulated time
         
-        if (DEBUG_MODE) cout << ">> 1" <<endl;
         // step 1: compute densities at grid points
         calc_particle_density(ELE);                             // electron density - computed in every time step
         if ((t % N_SUB) == 0) {                                 // ion density - computed in every N_SUB-th time steps (subcycling)
@@ -1622,7 +1622,6 @@ void do_one_cycle (void){
         }
 
         // step 2: solve Poisson equation
-        if (DEBUG_MODE) cout << ">> 2" <<endl;
         
         fill(rho.begin(),rho.end(),0.0);
         for(int n{0}; n<N_G; ++n){
@@ -1644,14 +1643,12 @@ void do_one_cycle (void){
         }
         
         // steps 3 & 4: move particles according to electric field interpolated to particle positions
-        if (DEBUG_MODE) cout << ">> 3 & 4" <<endl;
         move_particles(ELE);                                    // move all electrons in every time steps   
         if ((t % N_SUB) == 0) {                                 // move all ions in every N_SUB-th time steps (subcycling)
             for(int k{1}; k<N_SPECIES; ++k) move_particles(k); 
         }
 
         // step 5: check boundaries
-        if (DEBUG_MODE) cout << ">> 5" <<endl;
         check_boundary_constant(ELE);                           // check boundaries for all electrons in every time step
         if ((t % N_SUB) == 0) {                                 // check boundaries for all ions in every N_s-th time steps (subcycling)
             for(int k{1}; k<N_SPECIES; ++k) check_boundary_constant(k);
@@ -1672,7 +1669,6 @@ void do_one_cycle (void){
         }
 
         // step 6: collisions
-        if (DEBUG_MODE) cout << ">> 6" <<endl;
         // NULL-collision: select scattering particles
         for(int n{0}; n<N_SPECIES; n++){
             if ((n == ELE) || ((t % N_SUB) == 0)){
@@ -1702,10 +1698,11 @@ void do_one_cycle (void){
             rint  = static_cast<int>(rmod);
             rmod -= floor(rmod);
             nu    = 0.0;
+            double temperature = temp.at(rint)*(1.0-rmod)+temp.at(rint+1)*rmod;
             for (int b{0}; b<N_TARGET; b++){                              // loop over target species
                 t_dens[b] = (1.0-rmod) * target_density[b].at(rint) + rmod * target_density[b].at(rint+1);
                 if (WARM_GAS) {                                           // pick velocity components of a random target gas atom
-                    vx_a[b] = RNDveloc(TARGET_MASS(b)); vy_a[b] = RNDveloc(TARGET_MASS(b)); vz_a[b] = RNDveloc(TARGET_MASS(b)); 
+                    vx_a[b] = RNDveloc(TARGET_MASS(b), temperature); vy_a[b] = RNDveloc(TARGET_MASS(b), temperature); vz_a[b] = RNDveloc(TARGET_MASS(b), temperature); 
                 }  
                 g_sqr  = SQR(vx[ELE].at(p)-vx_a[b]) + SQR(vy[ELE].at(p)-vy_a[b]) + SQR(vz[ELE].at(p)-vz_a[b]);
                 g      = sqrt(g_sqr);
@@ -1730,11 +1727,12 @@ void do_one_cycle (void){
                     rint  = static_cast<int>(rmod);
                     rmod -= floor(rmod);
                     nu    = 0.0;
+                    double temperature = temp.at(rint)*(1.0-rmod)+temp.at(rint+1)*rmod;
                     for (int b{0}; b<N_TARGET; b++){                          // loop over target species
                         t_dens[b] = (1.0-rmod) * target_density[b].at(rint) + rmod * target_density[b].at(rint+1);
-                        vx_a[b]   = RNDveloc(TARGET_MASS(b));                 // pick velocity components of a random target particle
-                        vy_a[b]   = RNDveloc(TARGET_MASS(b)); 
-                        vz_a[b]   = RNDveloc(TARGET_MASS(b));  
+                        vx_a[b]   = RNDveloc(TARGET_MASS(b), temperature);                 // pick velocity components of a random target particle
+                        vy_a[b]   = RNDveloc(TARGET_MASS(b), temperature); 
+                        vz_a[b]   = RNDveloc(TARGET_MASS(b), temperature);  
                         g_sqr     = SQR(vx[n].at(p)-vx_a[b]) + SQR(vy[n].at(p)-vy_a[b]) + SQR(vz[n].at(p)-vz_a[b]);
                         g         = sqrt(g_sqr);
                         energy    = 0.5 * g_sqr * MU(n,b) * J_TO_EV;
@@ -1778,7 +1776,10 @@ void update_target_densities(const int act_cycle, const int total_cycle){
     // placeholder for more sophisticted algorithms
     for (int t{0}; t<N_TARGET; t++){     
         //put constant density according to target_raito
-        if(TARGET_RATIO[t]>0.0) fill(target_density[t].begin(), target_density[t].end(), GAS_DENSITY*TARGET_RATIO[t]);
+        //if(TARGET_RATIO[t]>0.0) fill(target_density[t].begin(), target_density[t].end(), GAS_DENSITY*TARGET_RATIO[t]);
+        for (int k=0; k<N_G; k++){
+                target_density[t].at(k) = PRESSURE / (K_BOLTZMANN * temp.at(k));
+            }
         for(size_t k{1};k<N_SPECIES;++k){
             // if t is one of species, target_density = cumul_density for given species
             if(SPECIES_KIND[k]==TARGET_KIND[t]) transform(target_density[t].begin(),target_density[t].end(),cumul_density[k].begin(),target_density[t].begin(),
@@ -2628,7 +2629,9 @@ int main (int argc, char *argv[]){
         fill(temp.begin(), temp.end(), T_WALL);           // initialize temperature vector
 
         for (int i=0; i<N_TARGET; i++){                    // initialize background gas densities
-            fill(target_density[i].begin(), target_density[i].end(), GAS_DENSITY*TARGET_RATIO[i]); //for o3a target_ratio is 0!
+            for (int k=0; k<N_G; k++){
+                target_density[i].at(k) = PRESSURE / (K_BOLTZMANN * temp.at(k));
+            }
             for(size_t k{1};k<N_SPECIES;++k){
                 if(SPECIES_KIND[k]==TARGET_KIND[i]){
                     fill(target_density[i].begin(), target_density[i].end(),0.0);
@@ -2675,13 +2678,19 @@ int main (int argc, char *argv[]){
             if(SEEDING && x[ELE].size() < N_INIT){ init_seed(N_INIT,true); } 
             do_one_cycle();
             update_target_densities(cycle-cycles_done, cycle);
-            cout << FA_ADDED_ION << " " << FA_ADDED_FA << " " << FA_REMOVED << endl;
-            cout << ENERGY_REMOVED_ION << " " << ENERGY_REMOVED_FA << " " << ENERGY_ADDED_FA << " "  << ENERGY_ADDED_ION << " " << ENERGY_ADDED_FA_REM << endl;
+            double sump = 0;
+            for (int k=0; k<N_G; k++){
+                sump += pfield.at(k);
+            }
+            cout << "Average P_field: " << sump/N_G << endl;
+        
         }
         cycles_done += no_of_cycles;
-        temp_calc();
+        solve_heat(pfield, ((double)no_of_cycles)*PERIOD, temp.front(), temp.back(), 0);
+        update_target_densities(no_of_cycles, cycles_done);
         save_xvector(temp, "temp.dat"); 
         save_xvector(pfield, "pfield.dat");
+        save_xvector(target_density[0], "target_density[0].dat");
     }
 
     fclose(datafile);
